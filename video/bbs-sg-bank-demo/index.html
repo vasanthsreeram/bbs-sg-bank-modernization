@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>BBS SG Bank — legacy to modern, measured</title>
+<script src="assets/vendor/gsap.min.js"></script>
+<style>
+:root {
+  --canvas-a: #fbfcfe;
+  --canvas-b: #eef2f9;
+  --ink: #0f1728;
+  --muted: #3c4864;
+  --line: #e2e8f2;
+  --blue: #2563eb;
+  --blue-soft: #e8effc;
+  --teal: #0d9488;
+  --teal-soft: #e3f5f1;
+  --amber: #b45309;
+  --amber-soft: #fdf0e2;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: #ffffff;
+  color: var(--ink);
+  font-family: system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+#root { position: relative; width: 100%; height: 100%; overflow: hidden; }
+
+.ground {
+  position: absolute; inset: 0;
+  background: linear-gradient(168deg, var(--canvas-a) 0%, #f5f7fc 52%, var(--canvas-b) 100%);
+}
+
+.scene {
+  display: flex; flex-direction: column;
+  padding: 66px 92px 152px;
+  gap: 26px;
+}
+
+.eyebrow {
+  font-size: 21px; font-weight: 700; letter-spacing: .17em; text-transform: uppercase;
+  color: #55627e; margin: 0;
+}
+h1 { font-size: 118px; font-weight: 800; letter-spacing: -.03em; line-height: 1; margin: 0; }
+h2 { font-size: 54px; font-weight: 700; letter-spacing: -.02em; line-height: 1.12; margin: 0; max-width: 1180px; }
+.lede { font-size: 29px; line-height: 1.45; color: var(--muted); margin: 0; max-width: 980px; }
+.small { font-size: 22px; line-height: 1.4; color: #55617c; margin: 0; }
+
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 54px; align-items: center; flex: 1; min-height: 0; }
+.split--wide-left { grid-template-columns: 1.15fr 1fr; }
+.stack { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+
+.card {
+  background: #ffffff; border: 1px solid var(--line); border-radius: 22px;
+  box-shadow: 0 22px 48px -26px rgba(15, 23, 40, .38);
+}
+.card--pad { padding: 30px 34px; }
+
+.shot { position: relative; overflow: hidden; border-radius: 20px; background: #0b1220; border: 1px solid #cdd7e8; }
+.shot img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+.shot--tall { height: 620px; }
+.shot--mid { height: 520px; }
+.shot--small { height: 330px; }
+.shot__tag {
+  position: absolute; left: 18px; bottom: 16px; z-index: 2;
+  font-family: ui-monospace, monospace; font-size: 19px; letter-spacing: .04em;
+  color: #d8e3f6; background: rgba(8, 14, 26, .82); border: 1px solid #22304a;
+  padding: 8px 14px; border-radius: 10px;
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 14px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 12px 20px; border-radius: 999px; font-size: 23px; font-weight: 600;
+  background: var(--blue-soft); color: #1c3fa8;
+}
+.chip--after { background: var(--teal-soft); color: #0a6a58; }
+.chip--warn { background: var(--amber-soft); color: var(--amber); }
+.chip--plain { background: #fff; border: 1px solid var(--line); color: var(--muted); }
+.chip__dot { width: 12px; height: 12px; border-radius: 50%; background: currentColor; opacity: .85; }
+
+.mono { font-family: ui-monospace, monospace; }
+.big { font-size: 92px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
+.tiny-label { font-size: 20px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #5d6a86; }
+
+/* --- legacy scan graphic --- */
+.rows { display: flex; flex-direction: column; gap: 9px; position: relative; padding: 18px; }
+.row {
+  height: 26px; border-radius: 6px; background: #dde5f2;
+  border: 1px solid #cfd9ea;
+}
+.row--hit { background: #cfd9f5; border-color: #b9c8ee; }
+.rows__scan {
+  position: absolute; left: 12px; right: 12px; height: 5px; top: 18px;
+  background: linear-gradient(90deg, rgba(37,99,235,0), #2563eb, rgba(37,99,235,0));
+  border-radius: 4px;
+}
+.rows__head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+
+/* --- index graphic --- */
+.index { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+.index__cell {
+  height: 42px; border-radius: 8px; background: #e6ecf7; border: 1px solid #d6e0f1;
+}
+.index__cell--key { background: var(--teal-soft); border-color: #bfe6dd; }
+
+/* --- bars --- */
+.bars { display: flex; align-items: flex-end; gap: 46px; height: 356px; }
+.bar { width: 128px; border-radius: 12px 12px 4px 4px; background: #c9d3e6; }
+.bar--after { background: var(--teal); }
+.bar--legacy { background: #8fa5c9; }
+.bar-val { font-size: 30px; font-weight: 700; margin-bottom: 10px; }
+
+.sizes { display: flex; flex-direction: column; gap: 14px; }
+.size-line { display: grid; grid-template-columns: 210px 1fr 92px; align-items: center; gap: 16px; }
+.size-track { height: 22px; border-radius: 6px; background: #e6ecf7; overflow: hidden; }
+.size-fill { height: 100%; border-radius: 6px; }
+.size-fill--before { background: #9db1d2; }
+.size-fill--after { background: var(--teal); }
+
+/* --- parity --- */
+.out {
+  background: #0f1728; color: #dbe6fb; border-radius: 16px; padding: 22px 24px;
+  font-family: ui-monospace, monospace; font-size: 22px; line-height: 1.65;
+}
+.out__title { font-size: 19px; letter-spacing: .12em; text-transform: uppercase; color: #8ea6cf; margin-bottom: 10px; }
+.rules { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 26px; }
+.rule { display: flex; gap: 12px; align-items: center; font-size: 24px; color: #33405c; }
+.rule__tick {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--teal-soft); color: #0a6a58;
+  display: grid; place-items: center; font-size: 17px; font-weight: 700;
+}
+.stamp {
+  display: inline-flex; align-items: center; gap: 14px; padding: 16px 26px; border-radius: 16px;
+  border: 2px solid var(--teal); color: #0a6a58; background: var(--teal-soft);
+  font-size: 27px; font-weight: 700;
+}
+
+/* --- forge rail --- */
+.rail { position: relative; display: flex; justify-content: space-between; gap: 16px; margin-top: 8px; }
+.rail__line { position: absolute; left: 0; right: 0; top: 42px; height: 4px; background: #dce4f2; border-radius: 3px; }
+.rail__line > span { display: block; height: 100%; width: 100%; background: var(--blue); border-radius: 3px; transform-origin: left center; }
+.stage { position: relative; z-index: 1; width: 240px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.stage__dot {
+  width: 30px; height: 30px; border-radius: 50%; background: var(--blue);
+  border: 5px solid #f7f9fd; box-shadow: 0 0 0 2px #cddbf5;
+}
+.stage__name { font-size: 24px; font-weight: 700; text-align: center; }
+.stage__note { font-size: 20px; color: #55617c; text-align: center; }
+
+/* --- captions --- */
+.captions {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  display: flex; align-items: flex-end; justify-content: center; padding: 0 120px 54px;
+}
+.cap {
+  background: rgba(255, 255, 255, .94); border: 1px solid var(--line);
+  box-shadow: 0 16px 36px -20px rgba(15, 23, 40, .5);
+  color: #101a2e; font-size: 33px; line-height: 1.35; font-weight: 500;
+  padding: 18px 36px; border-radius: 18px; max-width: 1440px; text-align: center;
+}
+.cap__wrap { position: relative; display: flex; justify-content: center; width: 100%; }
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="bbs-demo" data-start="0" data-width="1920" data-height="1080" data-duration="73.521">
+  <div class="ground clip" id="ground" data-start="0" data-duration="73.521"></div>
+  <section class="clip scene" id="s1" data-start="0.0" data-duration="7.798">
+    <div class="split split--wide-left" data-anim="scene-in" style="align-items:center">
+      <div class="stack">
+        <p class="eyebrow" data-anim="fade-up">SF Enterprise Hackathon 2.0 · synthetic demo</p>
+        <h1 data-anim="fade-up">BBS SG Bank</h1>
+        <p class="lede" data-anim="fade-up" style="font-size:34px">A nightly COBOL batch becomes an always-on ledger — same files, same rules, measured both ways.</p>
+        <div class="chips" data-anim="fade-up">
+          <span class="chip chip--plain"><span class="chip__dot"></span>before: legacy/bank.cob · 172 lines</span>
+          <span class="chip chip--after"><span class="chip__dot"></span>after: modern/bank.py · 54 lines</span>
+        </div>
+      </div>
+      <div class="shot shot--mid" data-anim="card-in">
+        <img src="assets/screens/overview.png" alt="BBS SG Bank demo site">
+        <span class="shot__tag">127.0.0.1:8788 · live demo</span>
+      </div>
+    </div>
+  </section>
+  <section class="clip scene" id="s2" data-start="7.798" data-duration="8.038">
+    <p class="eyebrow" data-anim="fade-up">01 · the nightly batch, before</p>
+    <h2 data-anim="fade-up">Every operation re-reads the whole account file</h2>
+    <div class="split">
+      <div class="card card--pad">
+        <div class="rows__head">
+          <span class="tiny-label">accounts.dat</span>
+          <span class="tiny-label mono">one file, re-read every row</span>
+        </div>
+        <div class="rows" id="s2-rows">
+          <span class="rows__scan" id="s2-scan"></span>
+          <span class="row"></span><span class="row"></span><span class="row"></span>
+          <span class="row"></span><span class="row"></span><span class="row"></span>
+          <span class="row"></span><span class="row"></span><span class="row"></span>
+        </div>
+        <p class="small" style="margin-top:14px">Legacy COBOL opens the master file per operation, finds two accounts, then rewrites the whole file — three full traversals per accepted row.</p>
+      </div>
+      <div class="stack">
+        <div class="card card--pad">
+          <p class="tiny-label">row visits, 1,200 accounts × 400 operations</p>
+          <p class="big" id="s2-count" style="margin-top:8px">0</p>
+        </div>
+        <div class="chips">
+          <span class="chip chip--plain">O(operations × accounts)</span>
+          <span class="chip chip--warn"><span class="chip__dot"></span>full file rewrite per accepted row</span>
+        </div>
+        <p class="small">GnuCOBOL 3.2.0, compiled with <span class="mono">cobc</span>, running as a real subprocess.</p>
+      </div>
+    </div>
+  </section>
+  <section class="clip scene" id="s3" data-start="15.836" data-duration="10.774">
+    <p class="eyebrow" data-anim="fade-up">02 · the replacement, after</p>
+    <h2 data-anim="fade-up">Same rules, held in an in-memory index</h2>
+    <div class="split">
+      <div class="stack">
+        <div class="card card--pad">
+          <div class="rows__head"><span class="tiny-label">accounts dict · integer cents</span><span class="tiny-label mono">O(1) lookup</span></div>
+          <div class="index" id="s3-index">
+            <span class="index__cell"></span><span class="index__cell"></span><span class="index__cell"></span><span class="index__cell index__cell--key"></span><span class="index__cell"></span><span class="index__cell"></span>
+            <span class="index__cell"></span><span class="index__cell"></span><span class="index__cell"></span><span class="index__cell"></span><span class="index__cell"></span><span class="index__cell"></span>
+            <span class="index__cell"></span><span class="index__cell index__cell--key"></span><span class="index__cell"></span><span class="index__cell"></span><span class="index__cell"></span><span class="index__cell"></span>
+            <span class="index__cell"></span><span class="index__cell"></span><span class="index__cell"></span><span class="index__cell"></span><span class="index__cell index__cell--key"></span><span class="index__cell"></span>
+          </div>
+        </div>
+        <div class="card card--pad sizes">
+          <div class="size-line">
+            <span class="mono" style="font-size:21px">legacy/bank.cob</span>
+            <span class="size-track"><span class="size-fill size-fill--before" id="s3-bar-a" style="width:100%"></span></span>
+            <span style="font-size:23px;font-weight:700;text-align:right">172 lines</span>
+          </div>
+          <div class="size-line">
+            <span class="mono" style="font-size:21px">modern/bank.py</span>
+            <span class="size-track"><span class="size-fill size-fill--after" id="s3-bar-b" style="width:31.4%"></span></span>
+            <span style="font-size:23px;font-weight:700;text-align:right">54 lines</span>
+          </div>
+          <p class="small">Python standard library only. One read of accounts, one read of operations, one write — no temp file.</p>
+        </div>
+      </div>
+      <div class="shot shot--tall" data-anim="card-in">
+        <img src="assets/screens/batch-live.png" alt="Batch console running the modern engine">
+        <span class="shot__tag">batch console · 63 rows · 60 posted · 3 rejected</span>
+      </div>
+    </div>
+  </section>
+  <section class="clip scene" id="s4" data-start="26.61" data-duration="7.39">
+    <p class="eyebrow" data-anim="fade-up">03 · parity before speed</p>
+    <h2 data-anim="fade-up">Byte-identical output, checked on every run</h2>
+    <div class="split">
+      <div class="stack">
+        <div class="out" data-anim="fade-up">
+          <div class="out__title">legacy/bank.cob · stdout</div>
+          PROCESSED=00000400<br>REJECTED=00000003<br>TOTAL_CENTS=0000005489403400
+        </div>
+        <span class="stamp" data-anim="pop">accounts.dat byte-identical ✓</span>
+      </div>
+      <div class="stack">
+        <div class="out" data-anim="fade-up">
+          <div class="out__title">modern/bank.py · stdout</div>
+          PROCESSED=00000400<br>REJECTED=00000003<br>TOTAL_CENTS=0000005489403400
+        </div>
+        <div class="rules" data-anim="stagger">
+          <span class="rule"><span class="rule__tick">✓</span>amount shape</span>
+          <span class="rule"><span class="rule__tick">✓</span>kind in D/W/T</span>
+          <span class="rule"><span class="rule__tick">✓</span>no self-transfer</span>
+          <span class="rule"><span class="rule__tick">✓</span>source exists</span>
+          <span class="rule"><span class="rule__tick">✓</span>destination exists</span>
+          <span class="rule"><span class="rule__tick">✓</span>funds check</span>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="clip scene" id="s5" data-start="34.0" data-duration="11.326">
+    <p class="eyebrow" data-anim="fade-up">04 · measured on this machine</p>
+    <h2 data-anim="fade-up">5,000 accounts, 500 operations</h2>
+    <div class="split split--wide-left">
+      <div class="stack">
+        <div class="card card--pad" style="display:flex;align-items:flex-end;gap:56px">
+          <div class="bars">
+            <div style="text-align:center">
+              <div class="bar-val">4.72 s</div>
+              <div class="bar bar--legacy" id="s5-bar-legacy" style="height:356px"></div>
+            </div>
+            <div style="text-align:center">
+              <div class="bar-val">0.041 s</div>
+              <div class="bar bar--after" id="s5-bar-modern" style="height:4px"></div>
+            </div>
+          </div>
+          <div style="padding-bottom:16px">
+            <p class="tiny-label">speedup</p>
+            <p class="big" id="s5-speedup" style="color:#0d9488">1×</p>
+            <p class="small" style="margin-top:10px">median of three timed runs<br>after one warm-up</p>
+          </div>
+        </div>
+        <p class="small">Bars drawn to scale from <span class="mono">scripts/evidence/benchmark-final-5000x500.txt</span>; the screenshot is a fresh rerun of the same fixture. Synthetic workload against a deliberately inefficient legacy design — a property of that access pattern, not a claim about COBOL in general.</p>
+      </div>
+      <div class="shot shot--mid" data-anim="card-in">
+        <img src="assets/screens/benchmark-live.png" alt="Benchmark view in the demo app">
+        <span class="shot__tag">fresh app rerun: 4.32 s → 0.036 s · 120× · byte-identical</span>
+      </div>
+    </div>
+  </section>
+  <section class="clip scene" id="s6" data-start="45.326" data-duration="9.407">
+    <p class="eyebrow" data-anim="fade-up">05 · the legacy path, running live</p>
+    <h2 data-anim="fade-up">Real COBOL, compiled and executed for each job</h2>
+    <div class="split split--wide-left">
+      <div class="shot shot--tall" data-anim="card-in">
+        <img src="assets/screens/terminal-result.png" alt="Operator terminal output of a real COBOL job">
+        <span class="shot__tag">operator terminal · 127.0.0.1:8792</span>
+      </div>
+      <div class="stack" data-anim="stagger">
+        <span class="chip"><span class="chip__dot"></span>0.915 s of COBOL wall clock, measured</span>
+        <span class="chip"><span class="chip__dot"></span>400 processed · 3 rejected</span>
+        <span class="chip chip--after"><span class="chip__dot"></span>STEP020 VERIFY PASS — matches modern/bank.py</span>
+        <span class="chip chip--plain">not a replay: the server runs cobc, then the job</span>
+        <p class="small">1,200 accounts × 400 operations, preset M, seed 20260923.</p>
+      </div>
+    </div>
+  </section>
+  <section class="clip scene" id="s7" data-start="54.733" data-duration="9.238">
+    <p class="eyebrow" data-anim="fade-up">06 · how the migration was run</p>
+    <h2 data-anim="fade-up">Opsera Forge carried the pipeline</h2>
+    <div class="card card--pad" style="margin-top:6px">
+      <div class="rail">
+        <span class="rail__line"><span id="s7-line"></span></span>
+        <span class="stage"><span class="stage__dot"></span><span class="stage__name">Assessment</span><span class="stage__note">57/100 · 10 findings, 3 high</span></span>
+        <span class="stage"><span class="stage__dot"></span><span class="stage__name">Intent</span><span class="stage__note">problem + scope</span></span>
+        <span class="stage"><span class="stage__dot"></span><span class="stage__name">PRD &amp; Spec</span><span class="stage__note">exported</span></span>
+        <span class="stage"><span class="stage__dot"></span><span class="stage__name">Architecture</span><span class="stage__note">before / after</span></span>
+        <span class="stage"><span class="stage__dot"></span><span class="stage__name">User stories</span><span class="stage__note">6 epics · 33 stories</span></span>
+        <span class="stage"><span class="stage__dot"></span><span class="stage__name">Testing</span><span class="stage__note">132 test cases</span></span>
+      </div>
+    </div>
+    <p class="small">Forge artifacts are planning and review documents; the running COBOL and Python engines in this demo are hand-written and tested in the repository.</p>
+  </section>
+  <section class="clip scene" id="s8" data-start="63.971" data-duration="9.55" style="justify-content:center">
+    <p class="eyebrow" data-anim="fade-up">BBS SG Bank · modernization walkthrough</p>
+    <h1 data-anim="fade-up" style="font-size:96px">Legacy to modern, measured</h1>
+    <div class="chips" data-anim="fade-up" style="margin-top:6px">
+      <span class="chip chip--plain">28.6× · 1,200 × 400</span>
+      <span class="chip chip--plain">115× · 5,000 × 500</span>
+      <span class="chip chip--after"><span class="chip__dot"></span>parity: byte-identical</span>
+      <span class="chip chip--plain">108 tests passing</span>
+    </div>
+    <p class="small" data-anim="fade-up" style="margin-top:18px;max-width:1200px">
+      Synthetic demonstration: invented accounts and balances, no real customers, no real transactions, and no affiliation with any bank.
+    </p>
+  </section>
+<audio id="vo-s1" src="assets/audio/s1.mp3" preload="auto" data-start="0.2" data-duration="7.248" data-volume="1"></audio>
+<audio id="vo-s2" src="assets/audio/s2.mp3" preload="auto" data-start="7.998" data-duration="7.488" data-volume="1"></audio>
+<audio id="vo-s3" src="assets/audio/s3.mp3" preload="auto" data-start="16.036" data-duration="10.224" data-volume="1"></audio>
+<audio id="vo-s4" src="assets/audio/s4.mp3" preload="auto" data-start="26.81" data-duration="6.84" data-volume="1"></audio>
+<audio id="vo-s5" src="assets/audio/s5.mp3" preload="auto" data-start="34.2" data-duration="10.776" data-volume="1"></audio>
+<audio id="vo-s6" src="assets/audio/s6.mp3" preload="auto" data-start="45.526" data-duration="8.857" data-volume="1"></audio>
+<audio id="vo-s7" src="assets/audio/s7.mp3" preload="auto" data-start="54.933" data-duration="8.688" data-volume="1"></audio>
+<audio id="vo-s8" src="assets/audio/s8.mp3" preload="auto" data-start="64.171" data-duration="9.0" data-volume="1"></audio>
+<div class="captions clip" id="cap-s1-1" data-start="0.2" data-duration="3.832"><div class="cap__wrap"><div class="cap">BBS SG Bank runs its ledger on a nightly COBOL</div></div></div>
+<div class="captions clip" id="cap-s1-2" data-start="4.032" data-duration="3.416"><div class="cap__wrap"><div class="cap">batch. This is the same bank, modernised.</div></div></div>
+<div class="captions clip" id="cap-s2-1" data-start="7.998" data-duration="3.61"><div class="cap__wrap"><div class="cap">The legacy program re-reads the whole account file for</div></div></div>
+<div class="captions clip" id="cap-s2-2" data-start="11.608" data-duration="3.878"><div class="cap__wrap"><div class="cap">every operation, then rewrites it for each one it accepts.</div></div></div>
+<div class="captions clip" id="cap-s3-1" data-start="16.036" data-duration="5.013"><div class="cap__wrap"><div class="cap">The replacement keeps the same rules in fifty-four lines of Python: accounts</div></div></div>
+<div class="captions clip" id="cap-s3-2" data-start="21.049" data-duration="5.211"><div class="cap__wrap"><div class="cap">indexed in memory, money held as integer cents, one read and one write per run.</div></div></div>
+<div class="captions clip" id="cap-s4-1" data-start="26.81" data-duration="3.766"><div class="cap__wrap"><div class="cap">Same input files, same validation, byte-identical</div></div></div>
+<div class="captions clip" id="cap-s4-2" data-start="30.576" data-duration="3.074"><div class="cap__wrap"><div class="cap">output. Only the access pattern changed.</div></div></div>
+<div class="captions clip" id="cap-s5-1" data-start="34.2" data-duration="5.255"><div class="cap__wrap"><div class="cap">Measured on this machine: five thousand accounts, five hundred operations. Four</div></div></div>
+<div class="captions clip" id="cap-s5-2" data-start="39.455" data-duration="5.521"><div class="cap__wrap"><div class="cap">point seven seconds becomes forty milliseconds. A hundred and fifteen times faster.</div></div></div>
+<div class="captions clip" id="cap-s6-1" data-start="45.526" data-duration="4.395"><div class="cap__wrap"><div class="cap">The operations terminal is not a replay. It compiles the original</div></div></div>
+<div class="captions clip" id="cap-s6-2" data-start="49.921" data-duration="4.462"><div class="cap__wrap"><div class="cap">COBOL and runs it live: nine tenths of a second for one small job.</div></div></div>
+<div class="captions clip" id="cap-s7-1" data-start="54.933" data-duration="4.266"><div class="cap__wrap"><div class="cap">Opsera Forge carried the migration: assessment, intent,</div></div></div>
+<div class="captions clip" id="cap-s7-2" data-start="59.199" data-duration="4.422"><div class="cap__wrap"><div class="cap">specification, architecture, user stories and test cases.</div></div></div>
+<div class="captions clip" id="cap-s8-1" data-start="64.171" data-duration="4.537"><div class="cap__wrap"><div class="cap">Legacy to modern, measured and reproducible. BBS SG Bank is a</div></div></div>
+<div class="captions clip" id="cap-s8-2" data-start="68.708" data-duration="4.463"><div class="cap__wrap"><div class="cap">synthetic demo, with no real accounts and no real customers.</div></div></div>
+</div>
+<script>
+(function () {
+  const tl = gsap.timeline({ paused: true });
+
+// ---- scene s1 ----
+tl.fromTo("#s1 [data-anim='fade-up']", { y: 34, opacity: 0 },
+  { y: 0, opacity: 1, duration: 0.62, ease: "power3.out", stagger: 0.11 }, 0.06);
+tl.fromTo("#s1 [data-anim='card-in']", { scale: 0.94, opacity: 0 },
+  { scale: 1, opacity: 1, duration: 0.85, ease: "power2.out" }, 0.28);
+tl.fromTo("#s1 [data-anim='stagger'] > *", { x: 40, opacity: 0 },
+  { x: 0, opacity: 1, duration: 0.5, ease: "power2.out", stagger: 0.14 }, 0.6);
+tl.fromTo("#s1 [data-anim='pop']", { scale: 0.8, opacity: 0 },
+  { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.6)" }, 1.4);
+tl.to("#s1", { opacity: 0, duration: 0.34, ease: "power2.in" }, 7.438);
+
+// ---- scene s2 ----
+tl.fromTo("#s2 [data-anim='fade-up']", { y: 34, opacity: 0 },
+  { y: 0, opacity: 1, duration: 0.62, ease: "power3.out", stagger: 0.11 }, 7.858);
+tl.fromTo("#s2 [data-anim='card-in']", { scale: 0.94, opacity: 0 },
+  { scale: 1, opacity: 1, duration: 0.85, ease: "power2.out" }, 8.078);
+tl.fromTo("#s2 [data-anim='stagger'] > *", { x: 40, opacity: 0 },
+  { x: 0, opacity: 1, duration: 0.5, ease: "power2.out", stagger: 0.14 }, 8.398);
+tl.fromTo("#s2 [data-anim='pop']", { scale: 0.8, opacity: 0 },
+  { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.6)" }, 9.198);
+tl.to("#s2", { opacity: 0, duration: 0.34, ease: "power2.in" }, 15.476);
+
+// ---- scene s3 ----
+tl.fromTo("#s3 [data-anim='fade-up']", { y: 34, opacity: 0 },
+  { y: 0, opacity: 1, duration: 0.62, ease: "power3.out", stagger: 0.11 }, 15.896);
+tl.fromTo("#s3 [data-anim='card-in']", { scale: 0.94, opacity: 0 },
+  { scale: 1, opacity: 1, duration: 0.85, ease: "power2.out" }, 16.116);
+tl.fromTo("#s3 [data-anim='stagger'] > *", { x: 40, opacity: 0 },
+  { x: 0, opacity: 1, duration: 0.5, ease: "power2.out", stagger: 0.14 }, 16.436);
+tl.fromTo("#s3 [data-anim='pop']", { scale: 0.8, opacity: 0 },
+  { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.6)" }, 17.236);
+tl.to("#s3", { opacity: 0, duration: 0.34, ease: "power2.in" }, 26.25);
+
+// ---- scene s4 ----
+tl.fromTo("#s4 [data-anim='fade-up']", { y: 34, opacity: 0 },
+  { y: 0, opacity: 1, duration: 0.62, ease: "power3.out", stagger: 0.11 }, 26.67);
+tl.fromTo("#s4 [data-anim='card-in']", { scale: 0.94, opacity: 0 },
+  { scale: 1, opacity: 1, duration: 0.85, ease: "power2.out" }, 26.89);
+tl.fromTo("#s4 [data-anim='stagger'] > *", { x: 40, opacity: 0 },
+  { x: 0, opacity: 1, duration: 0.5, ease: "power2.out", stagger: 0.14 }, 27.21);
+tl.fromTo("#s4 [data-anim='pop']", { scale: 0.8, opacity: 0 },
+  { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.6)" }, 28.01);
+tl.to("#s4", { opacity: 0, duration: 0.34, ease: "power2.in" }, 33.64);
+
+// ---- scene s5 ----
+tl.fromTo("#s5 [data-anim='fade-up']", { y: 34, opacity: 0 },
+  { y: 0, opacity: 1, duration: 0.62, ease: "power3.out", stagger: 0.11 }, 34.06);
+tl.fromTo("#s5 [data-anim='card-in']", { scale: 0.94, opacity: 0 },
+  { scale: 1, opacity: 1, duration: 0.85, ease: "power2.out" }, 34.28);
+tl.fromTo("#s5 [data-anim='stagger'] > *", { x: 40, opacity: 0 },
+  { x: 0, opacity: 1, duration: 0.5, ease: "power2.out", stagger: 0.14 }, 34.6);
+tl.fromTo("#s5 [data-anim='pop']", { scale: 0.8, opacity: 0 },
+  { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.6)" }, 35.4);
+tl.to("#s5", { opacity: 0, duration: 0.34, ease: "power2.in" }, 44.966);
+
+// ---- scene s6 ----
+tl.fromTo("#s6 [data-anim='fade-up']", { y: 34, opacity: 0 },
+  { y: 0, opacity: 1, duration: 0.62, ease: "power3.out", stagger: 0.11 }, 45.386);
+tl.fromTo("#s6 [data-anim='card-in']", { scale: 0.94, opacity: 0 },
+  { scale: 1, opacity: 1, duration: 0.85, ease: "power2.out" }, 45.606);
+tl.fromTo("#s6 [data-anim='stagger'] > *", { x: 40, opacity: 0 },
+  { x: 0, opacity: 1, duration: 0.5, ease: "power2.out", stagger: 0.14 }, 45.926);
+tl.fromTo("#s6 [data-anim='pop']", { scale: 0.8, opacity: 0 },
+  { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.6)" }, 46.726);
+tl.to("#s6", { opacity: 0, duration: 0.34, ease: "power2.in" }, 54.373);
+
+// ---- scene s7 ----
+tl.fromTo("#s7 [data-anim='fade-up']", { y: 34, opacity: 0 },
+  { y: 0, opacity: 1, duration: 0.62, ease: "power3.out", stagger: 0.11 }, 54.793);
+tl.fromTo("#s7 [data-anim='card-in']", { scale: 0.94, opacity: 0 },
+  { scale: 1, opacity: 1, duration: 0.85, ease: "power2.out" }, 55.013);
+tl.fromTo("#s7 [data-anim='stagger'] > *", { x: 40, opacity: 0 },
+  { x: 0, opacity: 1, duration: 0.5, ease: "power2.out", stagger: 0.14 }, 55.333);
+tl.fromTo("#s7 [data-anim='pop']", { scale: 0.8, opacity: 0 },
+  { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.6)" }, 56.133);
+tl.to("#s7", { opacity: 0, duration: 0.34, ease: "power2.in" }, 63.611);
+
+// ---- scene s8 ----
+tl.fromTo("#s8 [data-anim='fade-up']", { y: 34, opacity: 0 },
+  { y: 0, opacity: 1, duration: 0.62, ease: "power3.out", stagger: 0.11 }, 64.031);
+tl.fromTo("#s8 [data-anim='card-in']", { scale: 0.94, opacity: 0 },
+  { scale: 1, opacity: 1, duration: 0.85, ease: "power2.out" }, 64.251);
+tl.fromTo("#s8 [data-anim='stagger'] > *", { x: 40, opacity: 0 },
+  { x: 0, opacity: 1, duration: 0.5, ease: "power2.out", stagger: 0.14 }, 64.571);
+tl.fromTo("#s8 [data-anim='pop']", { scale: 0.8, opacity: 0 },
+  { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.6)" }, 65.371);
+tl.to("#s8", { opacity: 0, duration: 0.34, ease: "power2.in" }, 73.161);
+
+// ---- s2 detail: repeated full-file scans ----
+tl.fromTo("#s2-scan", { y: 0 }, { y: 250, duration: 1.35, ease: "none", repeat: 4, yoyo: true }, 8.198);
+tl.fromTo("#s2 .row", { backgroundColor: "#dde5f2" }, { backgroundColor: "#cfd9f5", duration: 0.3, repeat: 4, yoyo: true, stagger: 0.05 }, 8.198);
+
+const s2_count = { v: 0 };
+tl.to(s2_count, { v: 1400000, duration: 3.4, ease: "power2.out", onUpdate: function () { document.querySelector("#s2-count").textContent = Math.round(this.targets()[0].v).toLocaleString("en-US") + ""; } }, 8.298);
+
+// ---- s3 detail: index lookup + code size ----
+tl.fromTo("#s3-index .index__cell", { scale: 0.4, opacity: 0 },
+  { scale: 1, opacity: 1, duration: 0.34, ease: "back.out(1.8)", stagger: 0.035 }, 16.236);
+tl.to("#s3-index .index__cell--key", { backgroundColor: "#0d9488", duration: 0.3, stagger: 0.28, repeat: 2, yoyo: true }, 17.536);
+tl.fromTo("#s3-bar-a", { scaleX: 0 }, { scaleX: 1, transformOrigin: "left center", duration: 0.7, ease: "power2.out" }, 20.236);
+tl.fromTo("#s3-bar-b", { scaleX: 0 }, { scaleX: 1, transformOrigin: "left center", duration: 0.7, ease: "power2.out" }, 21.036);
+
+
+// ---- s5 detail: measured bars + speedup ----
+tl.fromTo("#s5-bar-legacy", { scaleY: 0 }, { scaleY: 1, transformOrigin: "bottom center", duration: 1.1, ease: "power2.out" }, 34.7);
+tl.fromTo("#s5-bar-modern", { scaleY: 0 }, { scaleY: 1, transformOrigin: "bottom center", duration: 0.5, ease: "power2.out" }, 37.2);
+
+const s5_speedup = { v: 1 };
+tl.to(s5_speedup, { v: 115, duration: 1.9, ease: "power2.out", onUpdate: function () { document.querySelector("#s5-speedup").textContent = Math.round(this.targets()[0].v).toLocaleString("en-US") + "×"; } }, 38.4);
+
+// ---- s7 detail: forge pipeline ----
+tl.fromTo("#s7-line", { scaleX: 0 }, { scaleX: 1, transformOrigin: "left center", duration: 3.2, ease: "none" }, 55.233);
+tl.fromTo("#s7 .stage", { y: 22, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out", stagger: 0.52 }, 55.283);
+tl.fromTo("#s7 .stage__dot", { scale: 0.5 }, { scale: 1, duration: 0.4, ease: "back.out(2)", stagger: 0.52 }, 55.283);
+
+tl.fromTo("#cap-s1-1 .cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 0.2);
+tl.fromTo("#cap-s1-2 .cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 4.032);
+tl.fromTo("#cap-s2-1 .cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 7.998);
+tl.fromTo("#cap-s2-2 .cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 11.608);
+tl.fromTo("#cap-s3-1 .cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 16.036);
+tl.fromTo("#cap-s3-2 .cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 21.049);
+tl.fromTo("#cap-s4-1 .cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 26.81);
+tl.fromTo("#cap-s4-2 .cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 30.576);
+tl.fromTo("#cap-s5-1 .cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 34.2);
+tl.fromTo("#cap-s5-2 .cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 39.455);
+tl.fromTo("#cap-s6-1 .cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 45.526);
+tl.fromTo("#cap-s6-2 .cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 49.921);
+tl.fromTo("#cap-s7-1 .cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 54.933);
+tl.fromTo("#cap-s7-2 .cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 59.199);
+tl.fromTo("#cap-s8-1 .cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 64.171);
+tl.fromTo("#cap-s8-2 .cap", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, 68.708);
+  window.__timelines["bbs-demo"] = tl;
+})();
+</script>
+</body>
+</html>

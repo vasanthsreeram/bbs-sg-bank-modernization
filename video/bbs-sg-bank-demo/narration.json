@@ -1,0 +1,42 @@
+[
+  {
+    "id": "s1",
+    "scene": "hook",
+    "text": "BBS SG Bank runs its ledger on a nightly COBOL batch. This is the same bank, modernised."
+  },
+  {
+    "id": "s2",
+    "scene": "legacy",
+    "text": "The legacy program re-reads the whole account file for every operation, then rewrites it for each one it accepts."
+  },
+  {
+    "id": "s3",
+    "scene": "modern",
+    "text": "The replacement keeps the same rules in fifty-four lines of Python: accounts indexed in memory, money held as integer cents, one read and one write per run."
+  },
+  {
+    "id": "s4",
+    "scene": "parity",
+    "text": "Same input files, same validation, byte-identical output. Only the access pattern changed."
+  },
+  {
+    "id": "s5",
+    "scene": "measured",
+    "text": "Measured on this machine: five thousand accounts, five hundred operations. Four point seven seconds becomes forty milliseconds. A hundred and fifteen times faster."
+  },
+  {
+    "id": "s6",
+    "scene": "terminal",
+    "text": "The operations terminal is not a replay. It compiles the original COBOL and runs it live: nine tenths of a second for one small job."
+  },
+  {
+    "id": "s7",
+    "scene": "forge",
+    "text": "Opsera Forge carried the migration: assessment, intent, specification, architecture, user stories and test cases."
+  },
+  {
+    "id": "s8",
+    "scene": "close",
+    "text": "Legacy to modern, measured and reproducible. BBS SG Bank is a synthetic demo, with no real accounts and no real customers."
+  }
+]

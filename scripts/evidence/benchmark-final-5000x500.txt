@@ -1,0 +1,9 @@
+2026-09-23 local rerun (one untimed warm-up, three timed runs per engine).
+Command: python3 scripts/benchmark.py --accounts 5000 --operations 500 --repeat 3 --quiet
+The harness restored identical fixtures before each run and verified parity before reporting speedup.
+
+accounts=5000 operations=500 (plus 3 rejected edge cases)
+legacy=4.723607s modern=0.040941s speedup=115.4x
+identical outputs and account balances: {'PROCESSED': 500, 'REJECTED': 3, 'TOTAL_CENTS': 499999475}
+
+These timings describe this deliberately inefficient synthetic COBOL baseline on this host. The earlier three-run measurement in benchmark-5000x500.txt was 128.1x; runtime varies between runs.

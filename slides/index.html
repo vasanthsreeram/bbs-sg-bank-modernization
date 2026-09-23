@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BBS SG Bank — COBOL → Modern | {TEAM_NAME}</title>
+<meta name="description" content="BBS SG Bank: from flat-file COBOL to an indexed batch. A truthful, evidence-linked legacy modernization driven through the Opsera Forge pipeline. Fictional bank, synthetic demo data." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232456d6'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='13' font-weight='700' fill='%23fff' text-anchor='middle'%3EBBS%3C/text%3E%3C/svg%3E" />
+<style>
+  :root{
+    --ink:#0f1b2d; --muted:#5a6b86; --faint:#8a97ad;
+    --line:#e3e9f4; --line2:#eef2f9;
+    --pri:#2456d6; --pri-soft:#eaf0ff; --pri-ink:#1b3fa8;
+    --amber:#b45309; --amber-soft:#fff5e6; --amber-line:#f6d9a8; --amber-bright:#e08a1e;
+    --emerald:#0f7a5a; --emerald-soft:#e7f7f0; --emerald-line:#b8e3d3; --emerald-bright:#12a37d;
+    --red:#b42318; --red-soft:#feeceb; --red-line:#f5c9c5;
+    --slate:#475569; --slate-soft:#eef1f6;
+    --radius:22px;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    color:var(--ink); font-family:var(--sans); overflow:hidden;
+    background:
+      radial-gradient(820px 520px at 10% -10%, #e6efff 0%, transparent 62%),
+      radial-gradient(760px 480px at 94% 112%, #e4f6ee 0%, transparent 64%),
+      #f5f8fd;
+    -webkit-font-smoothing:antialiased;
+  }
+  .deck{position:fixed;inset:0;display:grid;place-items:center;--k:1}
+  .slide{
+    position:absolute; width:1280px; height:720px; display:none; flex-direction:column;
+    background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:0 34px 80px rgba(15,27,45,.14), 0 2px 6px rgba(15,27,45,.05);
+    padding:42px 52px 34px; overflow:hidden; transform-origin:center center;
+  }
+  .deck[data-fit="on"] .slide.active{transform:scale(var(--k))}
+  .slide.active{display:flex}
+  .slide::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;
+    background:linear-gradient(90deg,var(--pri) 0%,#3f7ae8 42%,var(--emerald-bright) 100%)}
+
+  /* ---------- typography ---------- */
+  .kicker{color:var(--pri);font-weight:750;letter-spacing:.16em;text-transform:uppercase;font-size:12px;margin:0}
+  h1{font-size:47px;line-height:1.07;margin:10px 0 12px;font-weight:800;letter-spacing:-.02em}
+  h2{font-size:31px;line-height:1.16;margin:7px 0 15px;font-weight:780;letter-spacing:-.015em}
+  h3{font-size:15.5px;margin:0 0 8px;font-weight:750;letter-spacing:.01em}
+  p,li{font-size:15.5px;line-height:1.52;color:var(--ink);margin:.3em 0}
+  .muted{color:var(--muted)}
+  .small{font-size:13.5px;line-height:1.5}
+  .note{color:var(--muted);font-size:13px;line-height:1.5;margin:8px 0 0}
+  ul{margin:6px 0 6px 1.05em;padding:0}
+  li{margin:5px 0}
+  b,strong{font-weight:750}
+  code,pre{font-family:var(--mono)}
+  code{background:var(--line2);border:1px solid var(--line);border-radius:5px;padding:1px 4px;font-size:.9em}
+  pre{background:#f8fafd;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0;
+      overflow:hidden;font-size:13.5px;line-height:1.62;color:#26364f}
+  .k{color:var(--pri)} .s{color:var(--emerald)} .c{color:var(--faint)} .n{color:var(--amber)}
+  .body{flex:1;min-height:0}
+
+  /* ---------- grid ---------- */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start}
+  .grid2.tight{gap:20px}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .cards.four{grid-template-columns:repeat(4,1fr)}
+  .card{background:#fbfcff;border:1px solid var(--line);border-radius:13px;padding:13px 14px}
+  .card h3{color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-size:11px;margin-bottom:6px}
+  .big{font-size:31px;font-weight:800;line-height:1.05;letter-spacing:-.02em;color:var(--ink)}
+  .big.pri{color:var(--pri)} .big.amber{color:var(--amber)} .big.em{color:var(--emerald)}
+  .card .note{margin-top:4px}
+
+  /* ---------- pills / callouts ---------- */
+  .pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:750;
+        border:1px solid var(--line);background:#fff;color:var(--slate);white-space:nowrap}
+  .pill.ok{color:var(--emerald);border-color:var(--emerald-line);background:var(--emerald-soft)}
+  .pill.pend{color:var(--amber);border-color:var(--amber-line);background:var(--amber-soft)}
+  .pill.blk{color:var(--red);border-color:var(--red-line);background:var(--red-soft)}
+  .pill.prog{color:var(--pri);border-color:#c6d8ff;background:var(--pri-soft)}
+  .callout{border-left:4px solid var(--pri);background:var(--pri-soft);border-radius:0 11px 11px 0;
+           padding:12px 15px;margin:11px 0 0;font-size:14px;line-height:1.5}
+  .callout.amber{border-left-color:var(--amber-bright);background:var(--amber-soft)}
+  .callout.em{border-left-color:var(--emerald-bright);background:var(--emerald-soft)}
+  .takeaway{grid-column:1/-1;margin-top:6px;background:#f7f9fd;border:1px solid var(--line);
+            border-left:4px solid var(--pri);border-radius:0 12px 12px 0;padding:12px 16px;
+            font-size:14px;line-height:1.5}
+  .takeaway b{color:var(--pri)}
+
+  /* ---------- table ---------- */
+  table{width:100%;border-collapse:collapse;margin-top:4px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.42;vertical-align:top}
+  th{color:var(--muted);font-weight:750;text-transform:uppercase;letter-spacing:.07em;font-size:10.5px}
+  tr:last-child td{border-bottom:none}
+  td .pill{font-size:10px}
+
+  /* ---------- screenshots ---------- */
+  .shot{margin:0}
+  .shot__frame{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;
+               box-shadow:0 12px 26px rgba(15,27,45,.10)}
+  .shot__bar{display:flex;align-items:center;gap:7px;padding:6px 10px;background:#f7f9fd;border-bottom:1px solid var(--line);
+             font-size:10.5px;color:var(--muted);font-family:var(--mono)}
+  .shot__dot{width:8px;height:8px;border-radius:50%;background:#d7dfec;box-shadow:12px 0 0 #d7dfec, 24px 0 0 #d7dfec;margin-right:26px}
+  .shot img{display:block;width:100%;height:auto}
+  .shot figcaption{font-size:11px;line-height:1.45;color:var(--muted);margin-top:7px}
+  .shot figcaption b{color:var(--ink)}
+
+  /* ---------- svg ---------- */
+  svg{display:block;width:100%;height:auto}
+  .svg-label{font-family:var(--sans);font-size:11px;fill:var(--muted)}
+  .svg-label.strong{font-weight:750;fill:var(--ink)}
+  .svg-mono{font-family:var(--mono);font-size:10.5px;fill:var(--muted)}
+
+  /* ---------- footer ---------- */
+  footer{display:flex;justify-content:space-between;align-items:center;gap:12px;
+         margin-top:14px;padding-top:10px;border-top:1px solid var(--line2);
+         color:var(--faint);font-size:11px;letter-spacing:.02em}
+  .brand{font-weight:800;color:var(--ink);letter-spacing:.01em}
+  .brand b{color:var(--pri)}
+  .foot-tag{color:var(--faint)}
+
+  /* ---------- chrome ---------- */
+  .bar{position:fixed;left:0;top:0;height:3px;background:linear-gradient(90deg,var(--pri),var(--emerald-bright));width:0;transition:width .22s ease;z-index:20}
+  .hud{position:fixed;bottom:12px;right:18px;color:#8296b3;font:650 11px/1.4 var(--sans);letter-spacing:.09em;
+       background:rgba(255,255,255,.82);border:1px solid var(--line);border-radius:999px;padding:5px 12px;backdrop-filter:blur(6px);z-index:20}
+  .navbtns{position:fixed;bottom:10px;left:18px;display:flex;gap:6px;z-index:20}
+  .navbtns button{font:650 12px var(--sans);color:var(--slate);background:rgba(255,255,255,.9);
+    border:1px solid var(--line);border-radius:9px;padding:5px 10px;cursor:pointer}
+  .navbtns button:hover{border-color:#c6d3e8;color:var(--pri)}
+  .navbtns button:focus-visible{outline:2px solid var(--pri);outline-offset:1px}
+
+  /* Narrow screens: the 1280×720 stage scales to fit, so nothing clips. Pan/zoom to read. */
+  @media (max-width:820px){ .navbtns{display:none} .hud{font-size:10px;bottom:8px;right:10px;padding:4px 9px} }
+
+  @media print{
+    html,body{background:#fff;overflow:visible;height:auto}
+    .deck{position:static;display:block;--k:1}
+    .slide,.deck[data-fit="on"] .slide.active{display:flex!important;transform:none!important;
+      page-break-after:always;break-after:page;box-shadow:none;border:none;border-radius:0;
+      width:100%;height:100vh;padding:36px 44px}
+    .hud,.bar,.navbtns{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="deck" id="deck" data-fit="on">
+
+  <!-- ==================== 1 · TITLE ==================== -->
+  <section class="slide active" aria-label="Title">
+    <div class="grid2" style="align-items:center;gap:34px;flex:1">
+      <div>
+        <p class="kicker">{EVENT_NAME}</p>
+        <h1>BBS SG Bank:<br>from flat-file COBOL<br>to an indexed batch</h1>
+        <p class="muted" style="font-size:15px;max-width:30em">A truthful, evidence-linked legacy modernization — the
+          planning driven through the <b style="color:var(--pri)">Opsera Forge</b> pipeline, the engine written and tested here.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin:16px 0 0">
+          <span class="pill">1 Assessment</span><span class="pill">2 Intent</span><span class="pill">3 PRD-Spec</span>
+          <span class="pill">4 Architecture</span><span class="pill">5 User Stories</span><span class="pill">6 Testing</span>
+          <span class="pill blk">7 Delivery — pending</span>
+        </div>
+        <div style="margin-top:18px;display:flex;align-items:center;gap:14px">
+          <span style="width:38px;height:38px;border-radius:11px;background:var(--pri);color:#fff;font:800 12px/38px var(--mono);text-align:center">BBS</span>
+          <div>
+            <div class="brand" style="font-size:15px">{TEAM_NAME}</div>
+            <div class="small muted">{DATE} · hosted: {HOSTED_URL}</div>
+          </div>
+        </div>
+      </div>
+      <figure class="shot">
+        <div class="shot__frame">
+          <div class="shot__bar"><span class="shot__dot"></span>127.0.0.1 — demo app, overview</div>
+          <img src="assets/app-overview.png" alt="Screenshot of the local BBS SG Bank demo app overview: the legacy COBOL nightly batch panel beside the modern ledger engine panel, with synthetic demo data." />
+        </div>
+        <figcaption><b>The demo app we built</b> runs the unmodified <code>modern/bank.py</code> engine over synthetic data. Fictional bank; no real accounts.</figcaption>
+      </figure>
+    </div>
+    <footer><span class="brand"><b>BBS</b> SG Bank</span><span class="foot-tag">1 / 12 · synthetic fixtures · fictional institution</span></footer>
+  </section>
+
+  <!-- ==================== 2 · PROBLEM ==================== -->
+  <section class="slide" aria-label="The problem">
+    <p class="kicker">The problem</p>
+    <h2>The overnight batch gets slower as the bank grows</h2>
+    <div class="body grid2">
+      <div>
+        <p>For <b>every single operation</b>, the legacy program:</p>
+        <ul>
+          <li>re-opens <code>accounts.dat</code> and scans <b>every</b> account, then</li>
+          <li>rewrites <b>every</b> account row to apply one change.</li>
+        </ul>
+        <div class="callout amber">Cost = <b>operations × accounts</b>. Double the volume and the work roughly <b>quadruples</b>.</div>
+        <pre style="margin-top:12px"><span class="c">read operations.dat</span>
+<span class="k">for</span> each operation:          <span class="c"># O(M)</span>
+    scan ALL accounts         <span class="c"># O(A)</span>
+    rewrite ALL accounts      <span class="c"># O(A)</span>
+<span class="k">display</span> PROCESSED / REJECTED / TOTAL_CENTS</pre>
+      </div>
+      <div>
+        <svg viewBox="0 0 520 300" role="img" aria-label="Line chart: legacy work grows quadratically with batch volume; modern work stays nearly flat.">
+          <g stroke="#e9eef7" stroke-width="1">
+            <line x1="64" y1="40" x2="500" y2="40"/><line x1="64" y1="92" x2="500" y2="92"/>
+            <line x1="64" y1="145" x2="500" y2="145"/><line x1="64" y1="197" x2="500" y2="197"/>
+            <line x1="64" y1="250" x2="500" y2="250"/>
+          </g>
+          <line x1="64" y1="40" x2="64" y2="250" stroke="#cbd6e8"/>
+          <polyline fill="none" stroke="#e08a1e" stroke-width="3.5" stroke-linejoin="round"
+            points="64,250 107.6,247.9 151.2,241.6 194.8,231.1 238.4,216.4 282,197.5 325.6,174.4 369.2,147.1 412.8,115.6 456.4,79.9 500,40"/>
+          <polyline fill="none" stroke="#12a37d" stroke-width="3.5" stroke-linejoin="round"
+            points="64,250 107.6,247.5 151.2,245 194.8,242.4 238.4,239.9 282,237.4 325.6,234.9 369.2,232.4 412.8,229.8 456.4,227.3 500,224.8"/>
+          <circle cx="500" cy="40" r="4.5" fill="#e08a1e"/><circle cx="500" cy="224.8" r="4.5" fill="#12a37d"/>
+          <text class="svg-label strong" x="348" y="33" fill="#b45309">legacy O(M·A)</text>
+          <text class="svg-label strong" x="364" y="218" fill="#0f7a5a">modern O(M+A)</text>
+          <text class="svg-mono" x="64" y="274">small bank</text>
+          <text class="svg-mono" x="416" y="274">large bank</text>
+          <text class="svg-mono" x="10" y="145" transform="rotate(-90 10,145)">work / file I/O</text>
+        </svg>
+        <p class="note">Shapes are drawn from the code: the legacy inner loops are proportional to the account count, the modern engine is not.</p>
+      </div>
+      <div class="takeaway"><b>Why it hurts:</b> the overnight window is fixed, the transaction volume is not. At the default fixture size the legacy batch performs on the order of <b>1.4 million row visits</b> where about <b>1,600</b> would do (<code>docs/02-before-after.md</code> §3).</div>
+    </div>
+    <footer><span class="brand"><b>BBS</b> SG Bank</span><span class="foot-tag">2 / 12</span></footer>
+  </section>
+
+  <!-- ==================== 3 · BEFORE ==================== -->
+  <section class="slide" aria-label="Before">
+    <p class="kicker">Before — legacy COBOL</p>
+    <h2>Two lines in the real source explain everything</h2>
+    <div class="body">
+      <pre><span class="c">legacy/bank.cob</span>
+L108  <span class="c">*> Legacy bottleneck: reopen and scan the flat file for every operation.</span>
+L133  <span class="c">*> Legacy bottleneck: rewrite every account for every accepted operation.</span></pre>
+      <div class="grid2 tight" style="margin-top:14px">
+        <div>
+          <div class="cards">
+            <div class="card"><h3>Cost model</h3><div class="big amber">O(M·A)</div></div>
+            <div class="card"><h3>Passes / accepted op</h3><div class="big amber">3×</div><div class="note">full file</div></div>
+            <div class="card"><h3>Runtime deps</h3><div class="big">GnuCOBOL</div></div>
+          </div>
+          <svg viewBox="0 0 560 178" style="margin-top:16px" role="img" aria-label="Diagram: each accepted operation traverses the whole accounts file three times — scan to find, rewrite out to a temp file, rewrite back.">
+            <text class="svg-mono" x="0" y="12">PER ACCEPTED OPERATION — THE WHOLE FILE, THREE TIMES</text>
+            <text class="svg-mono" x="0" y="53">1 find / validate</text>
+            <rect x="150" y="39" width="410" height="18" rx="4" fill="#e08a1e" opacity=".72"/>
+            <text class="svg-mono" x="0" y="97">2 rewrite → temp</text>
+            <rect x="150" y="83" width="410" height="18" rx="4" fill="#e08a1e" opacity=".72"/>
+            <text class="svg-mono" x="0" y="141">3 temp → accounts</text>
+            <rect x="150" y="127" width="410" height="18" rx="4" fill="#e08a1e" opacity=".72"/>
+            <text class="svg-mono" x="150" y="170" fill="#b45309">full accounts.dat</text>
+          </svg>
+        </div>
+        <figure class="shot">
+          <div class="shot__frame">
+            <div class="shot__bar"><span class="shot__dot"></span>127.0.0.1:8792 — operator terminal</div>
+            <img src="assets/terminal-job.png" alt="Screenshot of the operator terminal running a real compiled legacy/bank.cob job: PROCESSED 400, REJECTED 3, STEP010 0.873s wall clock, parity check PASS." />
+          </div>
+          <figcaption><b>The legacy program still runs</b> — our operator terminal compiles and executes the unmodified <code>bank.cob</code> for real (GnuCOBOL 3.2.0). Preset M shown: 1,200 accounts × 400 ops, <b>400 processed / 3 rejected</b>, <b>0.873 s</b> real COBOL wall clock, parity <b>PASS</b>. Synthetic fixture; the screen labels its replay rows as simulated.</figcaption>
+        </figure>
+      </div>
+    </div>
+    <footer><span class="brand"><b>BBS</b> SG Bank</span><span class="foot-tag">3 / 12 · real COBOL, synthetic data</span></footer>
+  </section>
+
+  <!-- ==================== 4 · AFTER ==================== -->
+  <section class="slide" aria-label="After">
+    <p class="kicker">After — modern engine</p>
+    <h2>Index once, apply in O(1), write once</h2>
+    <div class="body grid2 tight">
+      <div>
+        <pre><span class="c"># modern/bank.py</span>
+accounts = {}                      <span class="c"># load once  O(A)</span>
+<span class="k">for</span> row <span class="k">in</span> accounts_file:
+    account, cents = row.split(<span class="s">"|"</span>)
+    accounts[account] = <span class="k">int</span>(cents)
+
+<span class="k">for</span> row <span class="k">in</span> operations_file:       <span class="c"># O(M), O(1)/op</span>
+    ... validate via dict lookups ...
+    accounts[source] += amount
+
+write accounts <span class="s">once</span>                <span class="c"># O(A)</span></pre>
+        <p class="note">Same validation rules, same on-disk format, same stdout contract — the parity harness enforces it.</p>
+      </div>
+      <div>
+        <div class="cards">
+          <div class="card"><h3>Cost model</h3><div class="big em">O(A+M)</div></div>
+          <div class="card"><h3>Writes / run</h3><div class="big em">1</div><div class="note">no temp file</div></div>
+          <div class="card"><h3>Runtime deps</h3><div class="big">python3</div><div class="note">stdlib only</div></div>
+        </div>
+        <svg viewBox="0 0 560 200" style="margin-top:16px" role="img" aria-label="Diagram: per run the modern engine reads accounts once, reads operations once, and writes accounts once.">
+          <text class="svg-mono" x="0" y="12">PER RUN — EACH FILE TOUCHED ONCE</text>
+          <text class="svg-mono" x="0" y="59">read accounts</text>
+          <rect x="150" y="45" width="410" height="18" rx="4" fill="#12a37d" opacity=".6"/>
+          <text class="svg-mono" x="0" y="115">read operations</text>
+          <rect x="150" y="101" width="410" height="18" rx="4" fill="#12a37d" opacity=".6"/>
+          <text class="svg-mono" x="0" y="171">write accounts</text>
+          <rect x="150" y="157" width="410" height="18" rx="4" fill="#12a37d" opacity=".6"/>
+          <text class="svg-mono" x="150" y="193" fill="#0f7a5a">in-memory dict · O(1) lookups · state written once</text>
+        </svg>
+      </div>
+      <div class="takeaway"><b>Takeaway:</b> three file touches per run — one read of accounts, one read of operations, one write — <b>regardless of how many operations arrive</b>. The legacy program spent three full traversals of the ledger on <i>every accepted operation</i>.</div>
+    </div>
+    <footer><span class="brand"><b>BBS</b> SG Bank</span><span class="foot-tag">4 / 12</span></footer>
+  </section>
+
+  <!-- ==================== 5 · TABLE ==================== -->
+  <section class="slide" aria-label="Before and after table">
+    <p class="kicker">Before / after</p>
+    <h2>What actually changed</h2>
+    <div class="body">
+      <table>
+        <tr><th>Dimension</th><th>Before — legacy</th><th>After — modern</th></tr>
+        <tr><td>Paradigm</td><td>Flat-file, re-scan per operation</td><td><b>In-memory index, one pass</b></td></tr>
+        <tr><td>Cost</td><td>O(operations × accounts)</td><td><b>O(accounts + operations)</b></td></tr>
+        <tr><td>File writes</td><td>Whole file per accepted op (via temp file)</td><td><b>Once per run</b></td></tr>
+        <tr><td>Source</td><td>172 lines COBOL</td><td><b>54 lines Python</b></td></tr>
+        <tr><td>Toolchain</td><td>GnuCOBOL</td><td><b>python3 (stdlib)</b></td></tr>
+        <tr><td>Change safety net</td><td>None in repo</td><td><b>Parity harness + 5 unit tests</b></td></tr>
+        <tr><td>Output contract</td><td colspan="2"><b>Unchanged — byte-identical <code>accounts.dat</code> and stdout on identical input</b></td></tr>
+      </table>
+      <div class="callout em" style="margin-top:14px"><b>Unchanged output is the headline.</b> The migration removes work; it does not change a single balance, count or byte.</div>
+      <p class="note">Safety divergences, stated plainly: the modern engine <b>fails closed</b> on duplicate account ids and on a balance that would exceed <code>PIC 9(12)</code>, where the legacy program keeps duplicates and truncates. This is deliberate and characterised by tests.</p>
+    </div>
+    <footer><span class="brand"><b>BBS</b> SG Bank</span><span class="foot-tag">5 / 12</span></footer>
+  </section>
+
+  <!-- ==================== 6 · CORRECTNESS ==================== -->
+  <section class="slide" aria-label="Correctness">
+    <p class="kicker">Correctness</p>
+    <h2>We prove it — we don't promise it</h2>
+    <div class="body grid2 tight">
+      <div>
+        <pre><span class="c"># scripts/benchmark.py — same fixtures, both engines</span>
+legacy = run(<span class="s">"cobc"</span> compiled binary)
+modern = run(<span class="s">"python3 modern/bank.py"</span>)
+<span class="k">assert</span> legacy.counts == modern.counts
+<span class="k">assert</span> legacy.accounts_bytes == modern.accounts_bytes</pre>
+        <p class="note">A divergence raises. Correctness is a test, not a claim.</p>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:7px">
+          <p><span class="pill ok">AT-1…AT-13 pass</span> deposits, withdrawals, transfers, every rejection case, format, totals, malformed input, parity.</p>
+          <p><span class="pill ok">core suites green</span> <code>33</code> in <code>scripts/test_bank.py</code> + <code>5</code> in <code>tests/test_modern.py</code></p>
+          <p><span class="pill ok">108 local tests passing</span> site <code>50</code> · operator terminal <code>20</code> · core <code>38</code></p>
+          <p><span class="pill ok">parity byte-identical</span> legacy vs modern on identical fixtures.</p>
+        </div>
+      </div>
+      <figure class="shot">
+        <div class="shot__frame">
+          <div class="shot__bar"><span class="shot__dot"></span>127.0.0.1 — batch console</div>
+          <img src="assets/app-batch.png" alt="Screenshot of the demo app batch console after a live run: 63 rows submitted, 60 posted, 3 rejected, engine time 0.33 ms, with value conservation and re-simulation checks marked green." />
+        </div>
+        <figcaption><b>Live run in the app:</b> 63 rows submitted → <b>60 posted / 3 rejected</b>, engine time <b>0.33 ms</b>. The console re-derives the expectation independently and checks the ledger total and <code>accounts.dat</code> before claiming a pass. Synthetic data.</figcaption>
+      </figure>
+      <div class="takeaway"><b>AT-12 is the parity gate</b> (identical counts, byte-identical <code>accounts.dat</code>); <b>AT-13 is the scaling gate</b> — the speedup must grow with the account count, and it does: 4.3× → 8.0× → 13.1× → 24.6× across the sweep.</div>
+    </div>
+    <footer><span class="brand"><b>BBS</b> SG Bank</span><span class="foot-tag">6 / 12 · synthetic fixtures</span></footer>
+  </section>
+
+  <!-- ==================== 7 · PERFORMANCE ==================== -->
+  <section class="slide" aria-label="Performance, measured">
+    <p class="kicker">Performance — measured</p>
+    <h2>Real numbers, with the caveat stated in the same breath</h2>
+    <div class="body">
+      <div class="grid2 tight">
+        <div>
+          <svg viewBox="0 0 560 186" role="img" aria-label="Bar chart, proportional to measured speedup: 28.6 times at 1200 accounts by 400 operations, and 128.1 times at 5000 accounts by 500 operations. A sweep at a fixed 200 operations shows the ratio growing with the account count.">
+            <text class="svg-mono" x="0" y="12">MEDIAN SPEEDUP, BYTE-IDENTICAL PARITY, ISOLATED GnuCOBOL 3.2.0</text>
+            <text class="svg-mono" x="0" y="48">1200 × 400</text>
+            <rect x="118" y="34" width="90" height="20" rx="5" fill="#e7f7f0" stroke="#b8e3d3"/>
+            <rect x="118" y="34" width="90" height="20" rx="5" fill="#12a37d" opacity=".55"/>
+            <text class="svg-label strong" x="218" y="49" fill="#0f7a5a">28.6× · 1.004 s → 0.035 s</text>
+            <text class="svg-mono" x="0" y="92">5000 × 500</text>
+            <rect x="118" y="78" width="405" height="20" rx="5" fill="#e7f7f0" stroke="#b8e3d3"/>
+            <rect x="118" y="78" width="405" height="20" rx="5" fill="#12a37d" opacity=".55"/>
+            <text class="svg-label strong" x="118" y="113" fill="#0f7a5a">128.1× · 4.728 s → 0.037 s</text>
+            <text class="svg-mono" x="0" y="146">SWEEP, 200 ops fixed — the ratio grows with the account count</text>
+            <text class="svg-mono" x="0" y="172">300 → 4.3×    600 → 8.0×    1200 → 13.1×    2400 → 24.6×</text>
+          </svg>
+          <div class="cards" style="margin-top:12px">
+            <div class="card"><h3>Live COBOL job (preset M)</h3><div class="big amber">400 / 3</div><div class="note">processed / rejected · 1.197 s real COBOL, 1.234 s overall · modern total matched</div></div>
+            <div class="card"><h3>Complexity</h3><div class="big pri">O(M·A) → O(M+A)</div><div class="note">writes: many per run → exactly one</div></div>
+            <div class="card"><h3>When unmeasured</h3><div class="big">null</div><div class="note">no <code>cobc</code> ⇒ <code>speedup: null</code>, never an estimate</div></div>
+          </div>
+        </div>
+        <figure class="shot">
+          <div class="shot__frame">
+            <div class="shot__bar"><span class="shot__dot"></span>127.0.0.1 — benchmark tab, live run</div>
+            <img src="assets/app-benchmark.png" alt="Screenshot of the demo app benchmark tab measuring both engines live: legacy 4.318 s versus modern 0.036 s on 5,000 accounts x 500 operations, with a parity check and a verdict stating the ratio grows with account count." />
+          </div>
+          <figcaption><b>Measured on this host, live in the app:</b> legacy <b>4.318 s</b> vs modern <b>0.036 s</b> on 5,000 × 500 (120×), parity checked first. Recorded medians in the repo are the <b>28.6× (1200×400)</b> and <b>128.1× (5000×500)</b> above.</figcaption>
+        </figure>
+      </div>
+      <div class="callout amber" style="margin-top:12px"><b>Disclosure, stated with every number:</b> the workload is <b>synthetic</b> and the legacy design is <b>deliberately inefficient</b> — it re-reads and rewrites the whole ledger per operation. The ratio is a property of <b>that algorithm</b>, <b>not</b> a general claim about COBOL, GnuCOBOL or banking workloads. Transcripts in <code>scripts/evidence/</code>; the demo app reports <code>speedup: null</code> when <code>cobc</code> is absent.</div>
+    </div>
+    <footer><span class="brand"><b>BBS</b> SG Bank</span><span class="foot-tag">7 / 12 · synthetic workload · deliberately inefficient baseline</span></footer>
+  </section>
+
+  <!-- ==================== 8 · FORGE ==================== -->
+  <section class="slide" aria-label="Built with Opsera Forge">
+    <p class="kicker">Built with Opsera Forge</p>
+    <h2>Forge framed the modernization — the engine is our code</h2>
+    <div class="body">
+      <svg viewBox="0 0 1176 78" role="img" aria-label="Forge pipeline rail: Assessment complete; Intent, PRD-Spec, Architecture and User Stories approved and exported; Testing exported without an approval step; Delivery pending.">
+        <line x1="58" y1="26" x2="1124" y2="26" stroke="#dbe3f0" stroke-width="3"/>
+        <g>
+          <circle cx="58" cy="26" r="9" fill="#e08a1e"/><text class="svg-label strong" x="44" y="12" fill="#b45309">Assessment</text><text class="svg-mono" x="30" y="54">complete · raw export absent</text>
+          <circle cx="236" cy="26" r="9" fill="#12a37d"/><text class="svg-label strong" x="222" y="12" fill="#0f7a5a">Intent</text><text class="svg-mono" x="222" y="54">v1 approved · exported</text>
+          <circle cx="414" cy="26" r="9" fill="#12a37d"/><text class="svg-label strong" x="400" y="12" fill="#0f7a5a">PRD-Spec</text><text class="svg-mono" x="400" y="54">v1 approved · exported</text>
+          <circle cx="592" cy="26" r="9" fill="#12a37d"/><text class="svg-label strong" x="578" y="12" fill="#0f7a5a">Architecture</text><text class="svg-mono" x="578" y="54">v1 approved · exported</text>
+          <circle cx="770" cy="26" r="9" fill="#12a37d"/><text class="svg-label strong" x="756" y="12" fill="#0f7a5a">User Stories</text><text class="svg-mono" x="756" y="54">v1 approved · exported</text>
+          <circle cx="948" cy="26" r="9" fill="#2456d6"/><text class="svg-label strong" x="934" y="12" fill="#2456d6">Testing</text><text class="svg-mono" x="934" y="54">v1 exported · not approved</text>
+          <circle cx="1124" cy="26" r="9" fill="#b42318"/><text class="svg-label strong" x="1110" y="12" fill="#b42318">Delivery</text><text class="svg-mono" x="1110" y="54">pending</text>
+        </g>
+      </svg>
+      <div class="grid2 tight" style="margin-top:14px">
+        <table>
+          <tr><th>Stage</th><th>Artifact</th><th>Repo home</th><th>Status</th></tr>
+          <tr><td>Assessment</td><td>Legacy analysis · ForgeScore</td><td><code>docs/forge/assessment.md</code></td><td><span class="pill pend">complete · raw export absent</span></td></tr>
+          <tr><td>Intent</td><td>Goal + constraints</td><td><code>docs/forge/intent.md</code></td><td><span class="pill ok">v1 approved · exported</span></td></tr>
+          <tr><td>PRD-Spec</td><td>FR / NFR</td><td><code>docs/forge/prd.md</code></td><td><span class="pill ok">v1 approved · exported</span></td></tr>
+          <tr><td>Architecture</td><td>Design + decisions</td><td><code>docs/forge/architecture.md</code></td><td><span class="pill ok">v1 approved · exported</span></td></tr>
+          <tr><td>User Stories</td><td>Work orders</td><td><code>docs/forge/work-orders.md</code></td><td><span class="pill ok">v1 approved · exported</span></td></tr>
+          <tr><td>Testing</td><td>Test plan</td><td><code>docs/forge/testing.md</code></td><td><span class="pill prog">v1 exported · not approved</span></td></tr>
+          <tr><td>Delivery</td><td>Release + hosted app</td><td><code>docs/forge/delivery.md</code></td><td><span class="pill blk">pending</span></td></tr>
+        </table>
+        <div>
+          <div class="cards" style="grid-template-columns:1fr 1fr">
+            <div class="card"><h3>ForgeScore</h3><div class="big amber">57<span style="font-size:15px;color:var(--muted)">/100</span></div><div class="note">Developing · <b>10 findings incl. 3 high</b>: O(m×n) scans, full-file rewrites, missing specs</div></div>
+            <div class="card"><h3>Exported to docs/forge/</h3><div class="big pri">5 <span style="font-size:15px;color:var(--muted)">v1 docs</span></div><div class="note">Intent · PRD-Spec (~95%) · Architecture (~100%) · User Stories (6 epics / 33 proposed stories, ~75%) · Testing (132 proposed cases)</div></div>
+          </div>
+          <div class="callout amber" style="font-size:12px"><b>What we will not overstate.</b> The raw Assessment report is <b>not exported</b> — <code>assessment.md</code> is a team transcription of the values read from the Forge UI. Testing v1 was <b>generated and exported without an approval step</b> (no Approve action shown). The exported documents sit in <code>docs/forge/</code> with verified SHA-256 hashes. The <b>33 stories and 132 test cases are proposals — not implemented features and not executed tests</b>; the local executable suites are <b>108 passing</b>. The supplied MCP token returns <b>401</b>, so exports came via signed-in browser downloads. <b>Forge did not generate or run the modern engine</b>, its document proposals (safe temp-file replacement, append-only audit, FastAPI, Forge Shipping) are <b>not implemented</b>, and <b>nothing is deployed</b>.</div>
+        </div>
+      </div>
+    </div>
+    <footer><span class="brand"><b>BBS</b> SG Bank</span><span class="foot-tag">8 / 12 · Forge authored the planning documents, not the engine</span></footer>
+  </section>
+
+  <!-- ==================== 9 · IMPACT ==================== -->
+  <section class="slide" aria-label="Modernization impact">
+    <p class="kicker">Modernization impact</p>
+    <h2>Why this matters to the bank</h2>
+    <div class="body">
+      <div class="cards four" style="margin-bottom:12px">
+        <div class="card"><h3>Scales</h3><p class="small">Linear batch: growing volume no longer degrades super-linearly.</p></div>
+        <div class="card"><h3>Cheaper I/O</h3><p class="small">One write per run instead of one or more per transaction.</p></div>
+        <div class="card"><h3>Safer change</h3><p class="small">A parity harness guards every future modification.</p></div>
+        <div class="card"><h3>Portable</h3><p class="small">Drops the GnuCOBOL toolchain; runs on python3 stdlib.</p></div>
+      </div>
+      <div class="cards four">
+        <div class="card"><h3>Compatible</h3><p class="small">Files and stdout unchanged — no downstream breakage.</p></div>
+        <div class="card"><h3>Documented</h3><p class="small">Every claim linked to code, a test, or a re-runnable command.</p></div>
+        <div class="card"><h3>Observable</h3><p class="small">Every posting audited with a status and a reason in the demo app.</p></div>
+        <div class="card"><h3>Frozen semantics</h3><p class="small">Same validation rules and rejection reasons, byte-for-byte output.</p></div>
+      </div>
+      <svg viewBox="0 0 1176 150" style="margin-top:18px" role="img" aria-label="Value chain: nightly-only COBOL batch becomes an always-on indexed ledger with an audit trail and tests.">
+        <rect x="0" y="16" width="360" height="124" rx="13" fill="#fff5e6" stroke="#f6d9a8"/>
+        <text class="svg-mono" x="18" y="41" fill="#b45309">BEFORE · NIGHTLY BATCH</text>
+        <text class="svg-label" x="18" y="71" fill="#7a4a12">batch window only · no queryable audit</text>
+        <text class="svg-label" x="18" y="97" fill="#7a4a12">whole-file rewrite per accepted op</text>
+        <text class="svg-label" x="18" y="123" fill="#7a4a12">change risk: none guarded in repo</text>
+        <path d="M384 77 h60" stroke="#cbd6e8" stroke-width="3"/>
+        <path d="M438 71 l12 6 -12 6 z" fill="#cbd6e8"/>
+        <rect x="462" y="16" width="360" height="124" rx="13" fill="#e7f7f0" stroke="#b8e3d3"/>
+        <text class="svg-mono" x="480" y="41" fill="#0f7a5a">AFTER · INDEXED LEDGER</text>
+        <text class="svg-label" x="480" y="71" fill="#125c45">post any time · per-row audit trail</text>
+        <text class="svg-label" x="480" y="97" fill="#125c45">one write per run · O(A+M)</text>
+        <text class="svg-label" x="480" y="123" fill="#125c45">parity harness + 108 local tests</text>
+        <rect x="840" y="16" width="336" height="124" rx="13" fill="#eaf0ff" stroke="#c6d8ff"/>
+        <text class="svg-mono" x="858" y="41" fill="#1b3fa8">NOT CLAIMED</text>
+        <text class="svg-label" x="858" y="71" fill="#33478a">public hosting · demo recording</text>
+        <text class="svg-label" x="858" y="97" fill="#33478a">Forge Delivery · published posts</text>
+        <text class="svg-label" x="858" y="123" fill="#33478a">raw Assessment export</text>
+      </svg>
+      <div class="takeaway" style="margin-top:18px"><b>Net effect for the bank:</b> the batch stops being the constraint — the overnight window no longer grows with the customer base, balances are postable outside the batch, and every future change is guarded by the parity harness.</div>
+    </div>
+    <footer><span class="brand"><b>BBS</b> SG Bank</span><span class="foot-tag">9 / 12</span></footer>
+  </section>
+
+  <!-- ==================== 10 · STATUS ==================== -->
+  <section class="slide" aria-label="Honest status">
+    <p class="kicker">Honest status</p>
+    <h2>What's done, what's open</h2>
+    <div class="body grid2">
+      <div>
+        <h3 style="color:var(--emerald)">Done — evidence in the repo</h3>
+        <ul>
+          <li><span class="pill ok">✅</span> Modern batch implemented (<code>modern/bank.py</code>)</li>
+          <li><span class="pill ok">✅</span> AT-1…AT-13 pass; core suites 33 + 5 green</li>
+          <li><span class="pill ok">✅</span> Parity byte-identical; 28.6× / 128.1× measured; live COBOL job</li>
+          <li><span class="pill ok">✅</span> Working local demo app (<code>site/</code>, 50 tests)</li>
+          <li><span class="pill ok">✅</span> Operator terminal runs real COBOL (<code>legacy-ui/</code>, 20 tests)</li>
+          <li><span class="pill ok">✅</span> Forge Assessment complete (57/100); Intent, PRD-Spec, Architecture, User Stories approved; Testing v1 exported (not approved)</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="color:var(--amber)">Open — stated, not hidden</h3>
+        <ul>
+          <li><span class="pill pend">🟡</span> Forge Delivery pending; raw Assessment report not exported</li>
+          <li><span class="pill pend">🟡</span> Remaining Forge exports (MCP token 401; browser downloads work)</li>
+          <li><span class="pill blk">⛔</span> Public hosted URL</li>
+          <li><span class="pill blk">⛔</span> Demo recording</li>
+          <li><span class="pill blk">⛔</span> Per-member public posts</li>
+          <li><span class="pill blk">⛔</span> Deck not yet rehearsed end-to-end</li>
+        </ul>
+        <div class="callout" style="margin-top:14px">Showing the open list is intentional — it is the same state as the submission checklist, so no claim here outruns its evidence.</div>
+      </div>
+      <div class="takeaway" style="margin-top:18px"><b>Current defensible claim:</b> a modern, linear-time batch that passes AT-1…AT-13 with 33 + 5 core tests (plus 50 site and 20 terminal), byte-identical legacy/modern parity, and measured <b>28.6× / 128.1×</b> on synthetic fixtures against a deliberately inefficient legacy design — wrapped in a working local demo app and an operator terminal that runs the real COBOL; the raw Assessment export, public hosting, demo recording and Forge Delivery are still pending.</div>
+    </div>
+    <footer><span class="brand"><b>BBS</b> SG Bank</span><span class="foot-tag">10 / 12</span></footer>
+  </section>
+
+  <!-- ==================== 11 · TEAM ==================== -->
+  <section class="slide" aria-label="Team and links">
+    <p class="kicker">Team &amp; links</p>
+    <h2>{TEAM_NAME}</h2>
+    <div class="body">
+      <table>
+        <tr><th>Member</th><th>Contribution</th><th>Post</th></tr>
+        <tr><td><b>{MEMBER_1_NAME}</b></td><td>Legacy assessment / COBOL analysis</td><td>{MEMBER_1_POST_URL}</td></tr>
+        <tr><td><b>{MEMBER_2_NAME}</b></td><td>Architecture + modern implementation</td><td>{MEMBER_2_POST_URL}</td></tr>
+        <tr><td><b>{MEMBER_3_NAME}</b></td><td>Parity harness + tests</td><td>{MEMBER_3_POST_URL}</td></tr>
+        <tr><td><b>{MEMBER_4_NAME}</b></td><td>Forge pipeline lead + delivery</td><td>{MEMBER_4_POST_URL}</td></tr>
+      </table>
+      <div class="cards" style="margin-top:16px">
+        <div class="card"><h3>Repo</h3><p class="small"><code>{REPO_URL}</code></p></div>
+        <div class="card"><h3>Demo video</h3><p class="small"><code>{DEMO_VIDEO_URL}</code> — script ready in <code>docs/05-demo-script.md</code></p></div>
+        <div class="card"><h3>Hosted</h3><p class="small"><code>{HOSTED_URL}</code> — runs locally today</p></div>
+      </div>
+      <p class="note">Placeholders above are replaced before submission; the per-member posts are a submission requirement and are not published yet.</p>
+      <div class="takeaway" style="margin-top:18px"><b>Reproduce it in four commands:</b>
+        <code>python3 scripts/test_bank.py</code> → 33 tests · <code>python3 tests/test_modern.py</code> → 5 tests ·
+        <code>python3 scripts/benchmark.py --accounts 1200 --operations 400</code> → parity + timings (needs <code>cobc</code>) ·
+        <code>python3 site/backend/app.py</code> → the demo app on <code>127.0.0.1</code>.</div>
+    </div>
+    <footer><span class="brand"><b>BBS</b> SG Bank</span><span class="foot-tag">11 / 12</span></footer>
+  </section>
+
+  <!-- ==================== 12 · CLOSE ==================== -->
+  <section class="slide" aria-label="Close">
+    <div class="body" style="display:flex;flex-direction:column;justify-content:center;align-items:flex-start">
+      <p class="kicker">Thank you</p>
+      <h1 style="font-size:52px;max-width:19em">Same result.<br>Linear cost.<br><span style="color:var(--emerald)">Proof in the repo.</span></h1>
+      <p class="muted" style="font-size:16px;max-width:36em;margin-top:6px">Questions? We'll answer with code, tests, and commands — never with a number we didn't measure.</p>
+      <div style="display:flex;gap:8px;margin-top:20px;flex-wrap:wrap">
+        <span class="pill">parity: byte-identical</span>
+        <span class="pill">28.6× · 128.1× measured, disclosed</span>
+        <span class="pill">108 local tests passing</span>
+        <span class="pill">synthetic data · fictional bank</span>
+      </div>
+    </div>
+    <footer><span class="brand"><b>BBS</b> SG Bank</span><span class="foot-tag">12 / 12 · {TEAM_NAME}</span></footer>
+  </section>
+
+</div>
+
+<div class="navbtns">
+  <button id="prev" type="button" aria-label="Previous slide">← Prev</button>
+  <button id="next" type="button" aria-label="Next slide">Next →</button>
+  <button id="full" type="button" aria-label="Toggle full screen">Full screen</button>
+</div>
+<div class="hud" id="hud" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var hud = document.getElementById('hud');
+  var bar = document.getElementById('bar');
+  var deck = document.getElementById('deck');
+  var i = 0;
+
+  function fit(){
+    var k = Math.min((window.innerWidth - 56) / 1280, (window.innerHeight - 56) / 720);
+    k = Math.max(0.28, Math.min(k, 1.22));
+    deck.style.setProperty('--k', k.toFixed(4));
+  }
+
+  function show(n, updateHash){
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function(s, k){ s.classList.toggle('active', k === i); });
+    hud.textContent = (i + 1) + ' / ' + slides.length + '  ·  ← → / space';
+    bar.style.width = ((i + 1) / slides.length * 100) + '%';
+    if (updateHash !== false && window.history && window.history.replaceState) {
+      window.history.replaceState(null, '', '#' + (i + 1));
+    }
+  }
+
+  document.addEventListener('keydown', function(e){
+    var k = e.key;
+    if (k === 'ArrowRight' || k === ' ' || k === 'PageDown' || k === 'n'){ show(i + 1); e.preventDefault(); }
+    else if (k === 'ArrowLeft' || k === 'PageUp' || k === 'p'){ show(i - 1); e.preventDefault(); }
+    else if (k === 'Home'){ show(0); }
+    else if (k === 'End'){ show(slides.length - 1); }
+    else if (k === 'f' || k === 'F'){ toggleFull(); e.preventDefault(); }
+  });
+
+  function toggleFull(){
+    if (document.fullscreenElement) { document.exitFullscreen(); }
+    else if (document.documentElement.requestFullscreen) { document.documentElement.requestFullscreen(); }
+  }
+
+  document.getElementById('prev').addEventListener('click', function(){ show(i - 1); });
+  document.getElementById('next').addEventListener('click', function(){ show(i + 1); });
+  document.getElementById('full').addEventListener('click', toggleFull);
+
+  deck.addEventListener('click', function(e){
+    if (e.target.closest('a, button, code, pre, table')) return;
+    show(i + (e.clientX < window.innerWidth / 2 ? -1 : 1));
+  });
+
+  window.addEventListener('resize', fit, { passive: true });
+  window.addEventListener('popstate', function(){
+    var n = parseInt((window.location.hash || '').slice(1), 10);
+    if (!isNaN(n)) show(n - 1, false);
+  });
+
+  fit();
+  var start = parseInt((window.location.hash || '').slice(1), 10);
+  show(isNaN(start) ? 0 : start - 1, false);
+})();
+</script>
+</body>
+</html>

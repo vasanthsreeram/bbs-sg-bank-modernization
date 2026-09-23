@@ -1,0 +1,23 @@
+# BBS SG Bank batch benchmark
+# host:   macOS-26.6.2-arm64-arm-64bit-Mach-O  python 3.14.5
+# cobc:   /tmp/gcb-build/install/bin/cobc  (cobc (GnuCOBOL) 3.2.0)
+# legacy: /Users/vas/Documents/mtests/sforgehack/legacy/bank.cob -> /var/folders/n6/3rg1dtpn3bv21hw75pb283ch0000gn/T/bankbench-bin-_7qua36s/legacy-bank
+# modern: /Users/vas/Documents/mtests/sforgehack/modern/bank.py
+# note:   wall-clock on this host, includes process start-up; re-run to reproduce (seed=20260923).
+# overhead reference (median): python interpreter start=0.028862s, legacy trivial batch=0.005631s
+
+# fixture: accounts=1200 operations=400 seed=20260923 sha256=82884f2a1bda709e313802388f8c785f3eaf82563c685c608ad3739840e3dbb9
+# parity: identical stdout metrics and byte-identical accounts.dat: YES
+# per-run wall time (s), inputs restored before every run (warmup=1, repeats=5):
+ run       legacy       modern
+   1     0.926565     0.035204
+   2     1.026592     0.034730
+   3     1.003951     0.033819
+   4     0.956813     0.035133
+   5     1.141381     0.037580
+median     1.003951     0.035133
+ min     0.926565     0.033819
+
+accounts=1200 operations=400 (plus 3 rejected edge cases)
+legacy=1.003951s modern=0.035133s speedup=28.6x
+identical outputs and account balances: {'PROCESSED': 400, 'REJECTED': 3, 'TOTAL_CENTS': 120001200}

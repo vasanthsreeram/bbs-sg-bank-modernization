@@ -1,0 +1,1502 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BBS SG Bank — operations terminal (synthetic demo)</title>
+<meta name="color-scheme" content="dark">
+<meta name="description" content="A 1980s green-screen operations terminal for the fictional BBS SG Bank nightly COBOL batch. Entirely synthetic data.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23061008'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='13' fill='%2343ff7d' text-anchor='middle'%3EBBS%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --phos: #43ff7d;
+    --phos-dim: #1e8f4c;
+    --phos-faint: #12602f;
+    --phos-bright: #d6ffe3;
+    --amber: #ffb02e;
+    --red: #ff6b5e;
+    --glass: #02140a;
+    --bezel: #141a16;
+    --room: #070b08;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: radial-gradient(circle at 50% 0%, #101711 0%, var(--room) 60%);
+    color: var(--phos);
+    font-family: var(--mono);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; gap: 22px; flex-wrap: wrap;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------------------------------------------------------------- machine */
+  .machine { width: min(1080px, 96vw); }
+  .machine__top {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 11px; letter-spacing: .18em; color: var(--phos-dim);
+    text-transform: uppercase; padding: 0 6px 8px;
+  }
+  .machine__top b { color: var(--phos); letter-spacing: .24em; }
+  .crt {
+    background: linear-gradient(180deg, #1c231d, var(--bezel) 40%, #0b0f0c);
+    border: 1px solid #2a332c;
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 24px 60px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .crt__glass {
+    position: relative; overflow: hidden;
+    border-radius: 10px / 16px;
+    background: radial-gradient(ellipse at 50% 45%, #041c0e 0%, var(--glass) 70%, #000 100%);
+    box-shadow: inset 0 0 60px rgba(0,0,0,.9), inset 0 0 22px rgba(67,255,125,.10);
+    border: 1px solid #0b2416;
+  }
+  .screen {
+    margin: 0;
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: clamp(8.5px, 1.06vw, 14.2px);
+    line-height: 1.19;
+    letter-spacing: .02em;
+    white-space: pre;
+    color: var(--phos);
+    text-shadow: 0 0 6px rgba(67,255,125,.45);
+    min-height: 24em;
+    outline: none;
+  }
+  .screen:focus-visible { box-shadow: inset 0 0 0 1px rgba(67,255,125,.4); }
+  .screen .dim { color: var(--phos-dim); text-shadow: none; }
+  .screen .faint { color: var(--phos-faint); text-shadow: none; }
+  .screen .bright, .screen .hi { color: var(--phos-bright); }
+  .screen .warn { color: var(--amber); text-shadow: 0 0 6px rgba(255,176,46,.4); }
+  .screen .err { color: var(--red); text-shadow: 0 0 6px rgba(255,107,94,.4); }
+  .screen .num { color: var(--phos-bright); }
+  .screen .hdr { color: var(--phos-bright); }
+  .screen .rule { color: var(--phos-faint); }
+  .screen .field { background: rgba(67,255,125,.14); border-bottom: 1px solid rgba(67,255,125,.5); }
+  .screen .field--active { background: var(--phos); color: #04170c; text-shadow: none; }
+  .screen .cur { background: var(--phos); color: #04170c; text-shadow: none; }
+  .scanlines, .glare { position: absolute; inset: 0; pointer-events: none; }
+  .scanlines {
+    background: repeating-linear-gradient(rgba(0,0,0,0) 0 2px, rgba(0,0,0,.22) 2px 3px);
+    mix-blend-mode: multiply; opacity: .55;
+  }
+  .glare {
+    background: radial-gradient(ellipse at 22% 8%, rgba(255,255,255,.07), transparent 55%);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .screen { animation: flicker 5.5s infinite steps(1); }
+    @keyframes flicker {
+      0%, 96%, 100% { opacity: 1; }
+      96.5% { opacity: .93; }
+      97.5% { opacity: .99; }
+    }
+    .blink { animation: blink 1.05s steps(1) infinite; }
+    @keyframes blink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: .05; } }
+  }
+  @media (prefers-reduced-motion: reduce) { .blink { animation: none; } }
+
+  /* ------------------------------------------------------------------- keys */
+  .keys {
+    display: grid; grid-template-columns: repeat(13, minmax(0, 1fr));
+    gap: 4px; margin-top: 12px;
+  }
+  .keys button {
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: .04em;
+    color: var(--phos); background: #0d140f; text-transform: uppercase;
+    border: 1px solid #2b352d; border-radius: 5px; padding: 6px 2px 5px;
+    cursor: pointer; line-height: 1.25;
+  }
+  .keys button:hover { background: #16241a; color: var(--phos-bright); }
+  .keys button:active { transform: translateY(1px); }
+  .keys button small { display: block; color: var(--phos-dim); font-size: 8px; letter-spacing: .1em; }
+  .keys .key--go { color: var(--phos-bright); border-color: #3d7a51; }
+
+  .machine__foot {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 10px 4px 0; font-size: 10.5px; color: var(--phos-dim); letter-spacing: .06em;
+  }
+  .led { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+  .led.is-live { background: var(--phos); box-shadow: 0 0 8px var(--phos); }
+  .machine__foot .spacer { flex: 1 1 auto; }
+
+  /* --------------------------------------------------------------- sidebar */
+  .doc { width: min(300px, 92vw); font-size: 11.5px; color: #9fd8b0; line-height: 1.55; }
+  .doc h2 { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--phos); margin: 0 0 6px; }
+  .doc section { border: 1px solid #1d2b21; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; background: #0a100b; }
+  .doc p { margin: 0 0 6px; }
+  .doc p:last-child { margin-bottom: 0; }
+  .doc dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 0; }
+  .doc dt { color: var(--phos-dim); }
+  .doc dd { margin: 0; color: #cdeedd; word-break: break-all; }
+  .doc code { color: var(--phos-bright); }
+  .doc .fine { font-size: 10.5px; color: #6f9c7f; }
+  @media (max-width: 900px) { body { align-items: flex-start; } .doc { width: min(1080px, 96vw); } }
+  @media (max-width: 700px) {
+    .crt__glass { overflow-x: auto; }
+    .screen { width: max-content; min-width: 100%; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<main class="machine">
+  <div class="machine__top">
+    <span><b>BBS SG BANK</b> &middot; operations terminal</span>
+    <span>model 3278-2 &middot; station 0A41</span>
+  </div>
+
+  <div class="crt">
+    <div class="crt__glass">
+      <pre class="screen" id="screen" tabindex="0" role="application" aria-label="BBS SG Bank operations terminal screen"></pre>
+      <div class="scanlines" aria-hidden="true"></div>
+      <div class="glare" aria-hidden="true"></div>
+    </div>
+    <div class="keys" id="keypad" role="group" aria-label="Keyboard"></div>
+  </div>
+
+  <div class="machine__foot">
+    <span class="led" id="led"></span>
+    <span id="engine-label">engine: probing…</span>
+    <span class="spacer"></span>
+    <span id="foot-note">synthetic demo &middot; no real accounts or customer data</span>
+  </div>
+</main>
+
+<aside class="doc">
+  <section>
+    <h2>Operator quick card</h2>
+    <dl>
+      <dt>ENTER</dt><dd>send the marked field / command</dd>
+      <dt>TAB</dt><dd>next field</dd>
+      <dt>ESC</dt><dd>clear the marked field</dd>
+      <dt>&uarr; &darr;</dt><dd>page lists</dd>
+      <dt>F1</dt><dd>help &amp; key legend</dd>
+      <dt>F3</dt><dd>return one level</dd>
+      <dt>F7 / F8</dt><dd>page up / page down</dd>
+      <dt>F9</dt><dd>submit the nightly batch</dd>
+      <dt>F12</dt><dd>log off</dd>
+    </dl>
+    <p class="fine" style="margin-top:8px">Commands: <code>ACCT id</code>, <code>OPS</code>, <code>BATCH</code>, <code>RUN S|M|L</code>, <code>JOURNAL</code>, <code>SYS</code>, <code>MENU</code>, <code>HELP</code>.</p>
+  </section>
+
+  <section>
+    <h2>Data source</h2>
+    <dl>
+      <dt>mode</dt><dd id="doc-mode">probing…</dd>
+      <dt>engine</dt><dd id="doc-engine">—</dd>
+      <dt>session</dt><dd id="doc-session">—</dd>
+      <dt>warehouse</dt><dd id="doc-warehouse">—</dd>
+    </dl>
+  </section>
+
+  <section>
+    <h2>Disclosure</h2>
+    <p class="fine" id="doc-disclosure">Synthetic demo. BBS SG Bank is fictional; all accounts, balances and operations are generated locally. No real customers, credentials or banking systems are involved.</p>
+    <p class="fine">The nightly batch is a real local COBOL job when the helper server is running; simulated screens are labelled SIMULATED on the terminal itself.</p>
+  </section>
+
+  <section>
+    <h2>Start the terminal</h2>
+    <p class="fine">From the repository root:</p>
+    <p class="fine"><code>legacy-ui/run.sh</code></p>
+    <p class="fine">then open <code>http://127.0.0.1:8792/</code>. Opened as a plain file, the terminal runs in labelled SIMULATED mode with embedded data.</p>
+  </section>
+</aside>
+
+<!-- Pure terminal logic: no DOM access, so it can be exercised in tests. -->
+<script id="terminal-logic">
+(function (global) {
+  "use strict";
+
+  var COLS = 80, ROWS = 24;
+  var DEFAULT_SEED = 20260923;
+  var EDGE_CASE_COUNT = 3;
+
+  var WAREHOUSES = {
+    SMALL: { accounts: 400, operations: 150, letter: "S", label: "SMALL" },
+    STANDARD: { accounts: 1200, operations: 400, letter: "M", label: "STANDARD" },
+    LARGE: { accounts: 5000, operations: 500, letter: "L", label: "LARGE" }
+  };
+  var LETTERS = { S: "SMALL", M: "STANDARD", L: "LARGE" };
+
+  var PF_KEYS = [
+    { key: 1, id: "help", label: "HELP" },
+    { key: 2, id: "menu", label: "MENU" },
+    { key: 3, id: "back", label: "RETURN" },
+    { key: 4, id: "refresh", label: "REFRESH" },
+    { key: 5, id: "refresh", label: "REFRESH" },
+    { key: 6, id: "reset", label: "RESET" },
+    { key: 7, id: "pageup", label: "PAGE UP" },
+    { key: 8, id: "pagedown", label: "PAGE DN" },
+    { key: 9, id: "submit", label: "SUBMIT" },
+    { key: 10, id: "jobview", label: "JOB" },
+    { key: 11, id: "discl", label: "DISCLOSE" },
+    { key: 12, id: "logoff", label: "LOGOFF" }
+  ];
+
+  var PREFIXES = ["HARBOURFRONT", "TIONG BAHRU", "KRANJI", "SENTOSA", "JURONG", "ANG MO KIO",
+    "PUNGGOL", "QUEENSTOWN", "CHANGI", "ORCHARD", "WOODLANDS", "SERANGOON"];
+  var SUFFIXES = ["RETAIL PTE LTD", "COFFEE CO", "AGRI SUPPLIES", "LEISURE GROUP", "PRECISION TOOLS",
+    "HARDWARE", "DIGITAL WORKS", "BAKERY SUPPLIES", "FREIGHT SERVICES", "FASHION HOUSE",
+    "AUTO PARTS", "GROCERS CO-OP", "MARINE SUPPLIES", "ELECTRICALS", "MEDICAL TRADING",
+    "STORAGE PTE LTD", "FOODS PTE LTD", "SYSTEMS PTE LTD"];
+
+  var DISCLOSURE_LINES = [
+    "SYNTHETIC DEMO -- BBS SG Bank is fictional.",
+    "Every account, balance and operation is generated locally.",
+    "No real customers, credentials or banking systems are involved."  ];
+  var DISCLOSURE = DISCLOSURE_LINES.join(" ");
+
+  var REASONS = {
+    "amount not positive": "AMOUNT NOT POSITIVE",
+    "unknown operation code": "UNKNOWN OP CODE",
+    "source account not found": "SOURCE NOT FOUND",
+    "destination account not found": "DEST NOT FOUND",
+    "source and destination equal": "SELF TRANSFER",
+    "insufficient funds": "INSUFFICIENT FUNDS"
+  };
+
+  // ------------------------------------------------------------- formatting
+  function pad(s, n, right) {
+    s = String(s == null ? "" : s);
+    if (s.length > n) s = s.slice(0, n);
+    return right ? s.padStart(n, " ") : s.padEnd(n, " ");
+  }
+  function zpad(v, n) { return String(v).padStart(n, "0"); }
+  function fmtMoney(cents) {
+    var neg = cents < 0; var v = Math.abs(Math.round(cents));
+    var whole = String(Math.floor(v / 100));
+    var grouped = "";
+    for (var i = 0; i < whole.length; i++) {
+      if (i > 0 && (whole.length - i) % 3 === 0) grouped += ",";
+      grouped += whole[i];
+    }
+    return (neg ? "-" : "") + grouped + "." + zpad(v % 100, 2);
+  }
+  function money(cents) { return pad(fmtMoney(cents), 12, true); }
+  function wide(cents) { return pad(fmtMoney(cents), 15, true); }
+  function grouped(n) { var s = String(n), out = ""; for (var i = 0; i < s.length; i++) { if (i > 0 && (s.length - i) % 3 === 0) out += ","; out += s[i]; } return out; }
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function txt(t, c) { return { t: t, c: c || "" }; }
+  function blank(n) { return txt(" ".repeat(n)); }
+  function stamp(ms) {
+    var d = new Date(ms);
+    function p(x) { return String(x).padStart(2, "0"); }
+    var months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+    return {
+      time: p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds()),
+      date: p(d.getDate()) + months[d.getMonth()] + String(d.getFullYear()).slice(2)
+    };
+  }
+
+  // ---------------------------------------------------- synthetic warehouse
+  function mulberry32(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      var t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function holderFor(i) {
+    return PREFIXES[(i - 1) % PREFIXES.length] + " " +
+      SUFFIXES[Math.floor((i - 1) / PREFIXES.length) % SUFFIXES.length];
+  }
+  function openingCents(i) { return 50000 + (i * 2654435761) % 9000000; }
+
+  // Same accept/reject rules as legacy/bank.cob and modern/bank.py.
+  function replayOps(opening, ops) {
+    var ledger = {}; var key;
+    for (key in opening) ledger[key] = opening[key];
+    var rows = []; var processed = 0, rejected = 0;
+    ops.forEach(function (op, index) {
+      var reason = null;
+      if (op.amount_cents <= 0) reason = "amount not positive";
+      else if ("DWT".indexOf(op.kind) < 0) reason = "unknown operation code";
+      else if (!(op.source in ledger)) reason = "source account not found";
+      else if (op.kind === "T" && !(op.target in ledger)) reason = "destination account not found";
+      else if (op.kind === "T" && op.source === op.target) reason = "source and destination equal";
+      else if (op.kind !== "D" && ledger[op.source] < op.amount_cents) reason = "insufficient funds";
+      if (reason === null) {
+        ledger[op.source] += op.kind === "D" ? op.amount_cents : -op.amount_cents;
+        if (op.kind === "T") ledger[op.target] += op.amount_cents;
+        processed++;
+      } else rejected++;
+      rows.push({
+        seq: index + 1, kind: op.kind, source: op.source, target: op.target,
+        amount_cents: op.amount_cents, status: reason === null ? "POSTED" : "REJECTED",
+        reason: reason, edge: !!op.edge,
+        line: op.kind + "|" + zpad(op.source, 8) + "|" + zpad(op.target, 8) + "|" + zpad(op.amount_cents, 12)
+      });
+    });
+    return { ledger: ledger, rows: rows, processed: processed, rejected: rejected };
+  }
+
+  function localWarehouse(name, seed) {
+    var spec = WAREHOUSES[name] || WAREHOUSES.STANDARD;
+    var count = spec.accounts, opCount = spec.operations;
+    var opening = {};
+    for (var i = 1; i <= count; i++) opening[i] = openingCents(i);
+    var rnd = mulberry32(seed);
+    var ops = [];
+    for (var k = 0; k < opCount; k++) {
+      var kind = "DWT"[k % 3];
+      var source = 1 + Math.floor(rnd() * count);
+      var target = 1 + Math.floor(rnd() * count);
+      if (target === source) target = (source % count) + 1;
+      ops.push({ kind: kind, source: source, target: target, amount_cents: (1 + Math.floor(rnd() * 500)) * 25 });
+    }
+    ops.push({ kind: "W", source: 1, target: 0, amount_cents: 99999999, edge: true });
+    ops.push({ kind: "T", source: 1, target: count + 1, amount_cents: 1, edge: true });
+    ops.push({ kind: "T", source: 1, target: 1, amount_cents: 1, edge: true });
+    var result = replayOps(opening, ops);
+    return {
+      name: name, accounts: count, operations: opCount, seed: seed,
+      opening: opening, rows: result.rows, ledger: result.ledger,
+      processed: result.processed, rejected: result.rejected,
+      openingTotal: Object.keys(opening).reduce(function (a, id) { return a + opening[id]; }, 0),
+      closingTotal: Object.keys(result.ledger).reduce(function (a, id) { return a + result.ledger[id]; }, 0),
+      ledgerState: "OPENING"
+    };
+  }
+
+  function ensureLocal(state) {
+    var key = state.warehouse + ":" + state.seed;
+    if (!state.local || state.localKey !== key) {
+      state.local = localWarehouse(state.warehouse, state.seed);
+      state.localKey = key;
+    }
+    return state.local;
+  }
+
+  // ----------------------------------------------------------------- state
+  function createState(now) {
+    return {
+      screen: "logon",
+      user: "",
+      fields: { userid: "", option: "", warehouse: "M", seed: String(DEFAULT_SEED), verify: "Y", cmd: "" },
+      focus: 0,
+      stack: [],
+      message: { text: "BBS SG BANK OPERATIONS TERMINAL -- ENTER OPERATOR ID", tone: "info" },
+      offline: true,
+      source: "SIMULATED",
+      engine: { available: false, path: null, cobc_version: null },
+      session: null,
+      warehouses: WAREHOUSES,
+      accountPage: null,
+      opsPage: null,
+      runs: null,
+      job: null,
+      page: { accounts: 0, ops: 0, journal: 0 },
+      pageSize: 14,
+      warehouse: "STANDARD",
+      seed: DEFAULT_SEED,
+      ledgerState: "OPENING",
+      ledgerTotal: null,
+      openingTotal: null,
+      accountCount: null,
+      operationCount: null,
+      fixtureDigest: null,
+      now: typeof now === "number" ? now : Date.now(),
+      local: null,
+      localKey: null,
+      detailId: null
+    };
+  }
+
+  function focusList(state) {
+    if (state.screen === "logon") return ["userid"];
+    if (state.screen === "menu") return ["option", "cmd"];
+    if (state.screen === "batch") return ["warehouse", "seed", "verify", "cmd"];
+    return ["cmd"];
+  }
+  function activeField(state) {
+    var list = focusList(state);
+    return list[Math.min(state.focus, list.length - 1)];
+  }
+  function msg(state, text, tone) { state.message = { text: text, tone: tone || "info" }; }
+
+  function currentWarehouseName(state) {
+    var letter = String(state.fields.warehouse || "M").toUpperCase();
+    return LETTERS[letter] || state.warehouse;
+  }
+  function currentSeed(state) {
+    var raw = String(state.fields.seed || "").replace(/[^0-9]/g, "");
+    return raw ? parseInt(raw, 10) : DEFAULT_SEED;
+  }
+
+  // ---------------------------------------------------------------- fields
+  function fieldSegs(state, id, width) {
+    var active = state.screen !== "detail" && activeField(state) === id;
+    var raw = String(state.fields[id] == null ? "" : state.fields[id]).slice(0, width);
+    var segs = [];
+    if (active) {
+      segs.push(txt(raw, "field field--active"));
+      segs.push(txt(raw.length < width ? "_" : "", "cur blink"));
+      if (raw.length + 1 < width) segs.push(txt(" ".repeat(width - raw.length - 1), "field field--active"));
+    } else {
+      segs.push(txt(pad(raw, width), "field"));
+    }
+    return segs;
+  }
+  function field(state, id, width) { return fieldSegs(state, id, width); }
+
+  // -------------------------------------------------------------- frame
+  function headerRow(state) {
+    var s = stamp(state.now);
+    var left = " BBS SG BANK  OPERATIONS TERMINAL";
+    var right = "SYS BBS1  " + s.date + " " + s.time + " ";
+    return [txt(left, "hdr"), txt(pad("", COLS - left.length - right.length)), txt(right, "hdr")];
+  }
+  function titleRow(state, title) {
+    return [txt(" " + pad(title, COLS - 2), "hdr")];
+  }
+  function messageRow(state) {
+    var tone = state.message.tone === "warn" ? "warn" : state.message.tone === "err" ? "err" : "bright";
+    return [txt(" ", ""), txt(pad(state.message.text, COLS - 2), tone)];
+  }
+  function commandRow(state) {
+    var list = focusList(state);
+    var hasCmd = list.indexOf("cmd") >= 0;
+    if (!hasCmd) {
+      return [txt(" COMMAND ===> ", "dim"), txt(pad("(no command prompt on this screen)", COLS - 16), "faint")];
+    }
+    return [txt(" COMMAND ===> ", "bright")].concat(fieldSegs(state, "cmd", 18));
+  }
+  function pfRow() {
+    var text = " PF1=HELP  PF3=RETURN  PF7=UP  PF8=DOWN  PF9=SUBMIT JOB  PF10=JOB  PF12=LOGOFF";
+    return [txt(pad(text, COLS), "dim")];
+  }
+  function oiaRow(state) {
+    var s = stamp(state.now);
+    var mode = state.offline ? "SIMULATED" : "LIVE COBOL";
+    var jobId = state.job ? state.job.id : "IDLE";
+    var left = " " + pad(state.user ? "OPRID " + state.user : "OPRID ....", 12) +
+      " SYS BBS1  MODE " + pad(mode, 10) + " JOB " + pad(jobId, 10);
+    var right = " " + s.time + "  SYNTHETIC DEMO ";
+    return [txt(pad(left, COLS - right.length), state.offline ? "warn" : "dim"), txt(right, state.offline ? "warn" : "dim")];
+  }
+  function frame(state, title, content) {
+    var rows = [headerRow(state), titleRow(state, title)];
+    for (var i = 0; i < 18; i++) rows.push(content[i] || []);
+    rows.push(messageRow(state));
+    rows.push(commandRow(state));
+    rows.push(pfRow());
+    rows.push(oiaRow(state));
+    return rows;
+  }
+
+  // -------------------------------------------------------------- screens
+  function screenLogon(state) {
+    var c = [];
+    c.push(blank(1));
+    c.push([txt("        BBS SG BANK  *  OPERATIONS TERMINAL", "bright")]);
+    c.push(blank(1));
+    c.push([txt("        NIGHTLY PROCESSING · ACCOUNT MASTER + OPERATIONS QUEUE", "dim")]);
+    c.push(blank(1));
+    c.push([txt("        OPERATOR ID  ===> ", "bright")].concat(fieldSegs(state, "userid", 8)));
+    c.push(blank(1));
+    c.push([txt("        PRESS ENTER TO SIGN ON.  ANY NON-BLANK ID IS ACCEPTED FOR THE DEMO.", "dim")]);
+    c.push(blank(1));
+    c.push([txt("        NIGHTLY JOB:  NBATCH  STEP010  LEGACY-BANK  (legacy/bank.cob)", "dim")]);
+    c.push([txt("        MASTER FILE:  ACCOUNTS.DAT + OPERATIONS.DAT  (fixed-width flat files)", "dim")]);
+    c.push(blank(1));
+    c.push([txt("        PF11 DATA SOURCE + DISCLOSURE", "faint")]);
+    return frame(state, "SIGN ON", c);
+  }
+
+  function screenMenu(state) {
+    var c = [];
+    c.push(blank(1));
+    var options = [
+      ["1", "ACCOUNT MASTER FILE", "browse and inquire on the ledger"],
+      ["2", "OPERATIONS QUEUE", "rows waiting for the nightly batch"],
+      ["3", "NIGHTLY BATCH SUBMISSION", "run STEP010 LEGACY-BANK"],
+      ["4", "BATCH JOURNAL", "completed runs and their counters"],
+      ["5", "SYSTEM STATUS", "engine, session and fixture"],
+      ["6", "HELP AND DISCLOSURE", "key legend and data source"]
+    ];
+    options.forEach(function (o) {
+      c.push([txt("   " + o[0] + "  ", "bright"), txt(pad(o[1], 30), ""), txt(o[2], "dim")]);
+    });
+    c.push(blank(1));
+    c.push([txt("   SELECT OPTION ===> ", "bright")].concat(fieldSegs(state, "option", 2)));
+    c.push(blank(1));
+    c.push([txt("   LEDGER STATE: " + state.ledgerState + "   ACCOUNTS: " +
+      (state.accountCount == null ? "----" : grouped(state.accountCount)) +
+      "   QUEUE: " + (state.operationCount == null ? "----" : grouped(state.operationCount)), "dim")]);
+    return frame(state, "OPERATIONS MENU", c);
+  }
+
+  function accountRowsPayload(state) {
+    if (!state.offline) return state.accountPage;
+    var local = ensureLocal(state);
+    var ids = Object.keys(local.opening).map(Number).sort(function (a, b) { return a - b; });
+    var movements = {};
+    local.rows.forEach(function (r) {
+      movements[r.source] = (movements[r.source] || 0) + 1;
+      if (r.kind === "T") movements[r.target] = (movements[r.target] || 0) + 1;
+    });
+    var size = state.pageSize, total = ids.length;
+    var pages = Math.max(1, Math.ceil(total / size));
+    var page = Math.max(0, Math.min(state.page.accounts, pages - 1));
+    var window = ids.slice(page * size, page * size + size);
+    return {
+      page: page, size: size, total: total, total_pages: pages,
+      ledger_state: local.ledgerState,
+      ledger_total_cents: Object.keys(local.ledger).reduce(function (a, id) { return a + local.ledger[id]; }, 0),
+      opening_total_cents: local.openingTotal,
+      rows: window.map(function (id) {
+        return {
+          id: zpad(id, 8), name: holderFor(id),
+          product: id % 2 ? "CURRENT" : "SAVINGS",
+          opening_cents: local.opening[id], balance_cents: local.ledger[id],
+          movements: movements[id] || 0
+        };
+      })
+    };
+  }
+
+  function screenAccounts(state) {
+    var data = accountRowsPayload(state);
+    var c = [];
+    c.push([txt("  " + pad("ID", 8) + "  " + pad("HOLDER", 30) + " " + pad("PRODUCT", 7) + " " +
+      pad("OPENING", 12, true) + " " + pad("BALANCE", 12, true) + " " + pad("MVE", 3, true), "hdr")]);
+    c.push([txt("  " + pad("", 8, false).replace(/ /g, "-") + "  " + pad("", 30).replace(/ /g, "-") + " " +
+      pad("", 7).replace(/ /g, "-") + " " + pad("", 12).replace(/ /g, "-") + " " +
+      pad("", 12).replace(/ /g, "-") + " " + pad("", 3).replace(/ /g, "-"), "rule")]);
+    if (!data) {
+      c.push(blank(1));
+      c.push([txt("  READING ACCOUNTS.DAT ...", "dim")]);
+    } else {
+      data.rows.forEach(function (row) {
+        var changed = row.balance_cents !== row.opening_cents;
+        c.push([
+          txt("  " + row.id + "  " + pad(row.name, 30) + " " + pad(row.product, 7) + " ", "dim"),
+          txt(money(row.opening_cents), "num"),
+          txt(" ", ""),
+          txt(money(row.balance_cents), changed ? "bright" : "num"),
+          txt(" " + pad(row.movements, 3, true), "dim")
+        ]);
+      });
+    }
+    while (c.length < 16) c.push(blank(1));
+    if (data) {
+      c.push([txt("  PAGE " + pad(data.page + 1, 3, true) + " OF " + pad(data.total_pages, 3, true) +
+        "   RECORDS " + grouped(data.total) + "   LEDGER STATE " + data.ledger_state, "dim")]);
+      c.push([txt("  LEDGER TOTAL " + wide(data.ledger_total_cents) +
+        "   OPENING TOTAL " + wide(data.opening_total_cents) +
+        (state.offline ? "  SIMULATED DATA" : ""), state.offline ? "warn" : "dim")]);
+    }
+    return frame(state, "ACCOUNT MASTER FILE", c);
+  }
+
+  function screenDetail(state) {
+    var data = accountRowsPayload(state);
+    var c = [];
+    var row = null;
+    if (data) {
+      data.rows.forEach(function (r) { if (r.id === state.detailId) row = r; });
+      if (!row && state.offline) {
+        var idNum = parseInt(state.detailId, 10);
+        var local = ensureLocal(state);
+        if (idNum >= 1 && idNum <= local.accounts) {
+          row = {
+            id: zpad(idNum, 8), name: holderFor(idNum),
+            product: idNum % 2 ? "CURRENT" : "SAVINGS",
+            opening_cents: local.opening[idNum], balance_cents: local.ledger[idNum],
+            movements: local.rows.filter(function (r) { return r.source === idNum || (r.kind === "T" && r.target === idNum); }).length
+          };
+        }
+      }
+    }
+    if (!row) {
+      c.push(blank(1));
+      c.push([txt("  ACCOUNT " + state.detailId + " IS NOT ON THE MASTER FILE.", "warn")]);
+      c.push([txt("  PRESS PF3 TO RETURN.", "dim")]);
+    } else {
+      c.push(blank(1));
+      c.push([txt("  ACCOUNT NUMBER ....... " + row.id, "bright")]);
+      c.push([txt("  HOLDER ............... " + row.name, "")]);
+      c.push([txt("  PRODUCT .............. " + row.product, "")]);
+      c.push([txt("  OPENING BALANCE ...... " + money(row.opening_cents) + " SGD", "")]);
+      c.push([txt("  CURRENT BALANCE ...... " + money(row.balance_cents) + " SGD", row.balance_cents !== row.opening_cents ? "bright" : "")]);
+      c.push([txt("  QUEUE MOVEMENTS ...... " + row.movements, "")]);
+      c.push(blank(1));
+      c.push([txt("  RECENT QUEUE ROWS ON THIS ACCOUNT", "hdr")]);
+      var wanted = parseInt(row.id, 10);
+      var local2 = ensureLocal(state);
+      var rowsFor = (state.offline ? local2.rows : (state.opsPage && state.opsPage.rows) || []).filter(function (r) {
+        return r.source === wanted || (r.kind === "T" && r.target === wanted);
+      }).slice(0, 6);
+      if (!rowsFor.length) c.push([txt("  NONE.", "dim")]);
+      rowsFor.forEach(function (r) {
+        c.push([txt("   #" + zpad(r.seq, 5) + " " + r.kind + " " +
+          zpad(r.source, 8) + " -> " + zpad(r.target, 8) +
+          "  " + money(r.amount_cents) + "  ", "dim"),
+          txt(pad(r.status, 8), r.status === "POSTED" ? "num" : "warn"),
+          txt(" " + (REASONS[r.reason] || ""), "warn")]);
+      });
+    }
+    while (c.length < 18) c.push(blank(1));
+    return frame(state, "ACCOUNT INQUIRY -- " + (state.detailId || "----"), c);
+  }
+
+  function operationsPayload(state) {
+    if (!state.offline) return state.opsPage;
+    var local = ensureLocal(state);
+    var size = state.pageSize, total = local.rows.length;
+    var pages = Math.max(1, Math.ceil(total / size));
+    var page = Math.max(0, Math.min(state.page.ops, pages - 1));
+    var posted = local.rows.filter(function (r) { return r.status === "POSTED"; }).length;
+    return {
+      page: page, size: size, total: total, total_pages: pages,
+      counts: { total: total, posted: posted, rejected: total - posted },
+      rows: local.rows.slice(page * size, page * size + size)
+    };
+  }
+
+  function screenOperations(state) {
+    var data = operationsPayload(state);
+    var c = [];
+    c.push([txt("  " + pad("SEQ", 5) + " " + pad("OP", 2) + " " + pad("SOURCE", 8) + " " +
+      pad("DEST", 8) + " " + pad("AMOUNT", 12, true) + "  " + pad("STATUS", 8) + " " +
+      pad("REASON", 20), "hdr")]);
+    c.push([txt("  " + pad("", 5).replace(/ /g, "-") + " " + pad("", 2).replace(/ /g, "-") + " " +
+      pad("", 8).replace(/ /g, "-") + " " + pad("", 8).replace(/ /g, "-") + " " +
+      pad("", 12).replace(/ /g, "-") + "  " + pad("", 8).replace(/ /g, "-") + " " +
+      pad("", 20).replace(/ /g, "-"), "rule")]);
+    if (!data) {
+      c.push(blank(1));
+      c.push([txt("  READING OPERATIONS.DAT ...", "dim")]);
+      while (c.length < 18) c.push(blank(1));
+      return frame(state, "OPERATIONS QUEUE -- " + state.warehouse, c);
+    }
+    data.rows.forEach(function (r) {
+      c.push([
+        txt("  " + zpad(r.seq, 5) + " " + pad(r.kind, 2) + " " +
+          zpad(r.source, 8) + " " + zpad(r.target, 8) + " ", "dim"),
+        txt(money(r.amount_cents), "num"),
+        txt("  "),
+        txt(pad(r.status, 8), r.status === "POSTED" ? "num" : "warn"),
+        txt(" " + pad(REASONS[r.reason] || "", 20), "dim")
+      ]);
+    });
+    while (c.length < 16) c.push(blank(1));
+    c.push([txt("  PAGE " + pad(data.page + 1, 3, true) + " OF " + pad(data.total_pages, 3, true) +
+      "   ROWS " + grouped(data.total) + "   PRED-POSTED " + grouped(data.counts.posted) +
+      "   PRED-REJECTED " + grouped(data.counts.rejected), "dim")]);
+    c.push([txt("  ROW STATUS COMES FROM A REPLAY OF THE RULES -- THE JOB'S COUNTERS ARE ON PF10.", "faint")]);
+    return frame(state, "OPERATIONS QUEUE -- " + state.warehouse, c);
+  }
+
+  function screenBatch(state) {
+    var c = [];
+    c.push(blank(1));
+    c.push([txt("  NIGHTLY BATCH SUBMISSION  --  STEP010  EXEC PGM=LEGACY-BANK", "hdr")]);
+    c.push([txt("  LEGACY COST IS O(OPERATIONS x ACCOUNTS) -- THE WHOLE FILE IS REWRITTEN PER ROW.", "dim")]);
+    c.push(blank(1));
+    c.push([txt("  PRESET  WAREHOUSE     ACCOUNTS  OPERATIONS   LEGACY COST", "hdr")]);
+    ["SMALL", "STANDARD", "LARGE"].forEach(function (name) {
+      var w = WAREHOUSES[name];
+      c.push([txt("   " + w.letter + "      " + pad(w.label, 14) + grouped(w.accounts).padStart(8) +
+        grouped(w.operations).padStart(12) + ("   O(" + grouped(w.operations) + " x " + grouped(w.accounts) + ")").padStart(15), "")]);
+    });
+    c.push(blank(1));
+    c.push([txt("  PRESET (S/M/L) ===> ", "bright")].concat(fieldSegs(state, "warehouse", 1)));
+    c.push([txt("  RANDOM SEED     ===> ", "bright")].concat(fieldSegs(state, "seed", 8)));
+    c.push([txt("  VERIFY PARITY   ===> ", "bright")].concat(fieldSegs(state, "verify", 1)));
+    c.push(blank(1));
+    c.push([txt("  VERIFY RE-RUNS MODERN/BANK.PY ON THE SAME FIXTURE AND COMPARES THE COUNTERS.", "dim")]);
+    c.push(blank(1));
+    c.push([txt("  PRESS PF9 TO SUBMIT THE JOB.", "bright")]);
+    c.push([txt("  ENGINE: " + (state.offline ? "NOT REACHABLE -- A SUBMITTED JOB WOULD BE SIMULATED" :
+      "LOCAL COBOL READY (" + (state.engine.cobc_version || "cobc") + ")"), state.offline ? "warn" : "dim")]);
+    while (c.length < 18) c.push(blank(1));
+    return frame(state, "BATCH SUBMISSION", c);
+  }
+
+  function jobSpoolRows(state) {
+    var job = state.job;
+    if (!job) return [];
+    var elapsed = jobElapsed(state);
+    var reveal = state.offline ? job.spool.length
+      : Math.min(job.spool.length, Math.floor(elapsed * 45) + 2);
+    return job.spool.slice(0, Math.max(0, reveal));
+  }
+  function jobElapsed(state) {
+    var job = state.job;
+    if (!job) return 0;
+    if (job.state !== "running") return job.elapsed_s || 0;
+    if (job.started_ms) return Math.max(0, (state.now - job.started_ms) / 1000);
+    return job.elapsed_s || 0;
+  }
+
+  function screenJob(state) {
+    var c = [];
+    var job = state.job;
+    if (!job) {
+      c.push(blank(1));
+      c.push([txt("  NO JOB HAS BEEN SUBMITTED IN THIS SESSION.", "dim")]);
+      c.push([txt("  GO TO THE BATCH SUBMISSION SCREEN (OPTION 3) AND PRESS PF9.", "dim")]);
+      while (c.length < 18) c.push(blank(1));
+      return frame(state, "JOB OUTPUT", c);
+    }
+    var running = job.state === "running";
+    var elapsed = jobElapsed(state);
+    c.push([txt("  JOB " + job.id + "   STATE " + String(job.state).toUpperCase() +
+      (job.mode === "simulated" ? "  *** SIMULATED ***" : ""), job.mode === "simulated" ? "warn" : "hdr")]);
+    c.push([txt("  WAREHOUSE " + job.warehouse + "   ACCOUNTS " + grouped(job.accounts) +
+      "   OPERATIONS " + grouped(job.operations) + "   SEED " + job.seed, "dim")]);
+    var simulated = job.mode === "simulated";
+    c.push([txt("  PHASE " + pad(job.phase || "SUBMITTED", 20) +
+      "   ELAPSED " + pad(elapsed.toFixed(3) + "s", 9) +
+      (simulated ? " (SIMULATED DISPLAY)" : running ? " (LIVE WALL CLOCK)" : " (FINAL, REAL)"),
+      running ? "bright" : "dim")]);
+    if (simulated) {
+      c.push([txt("  SIMULATED REPLAY -- NO STEP010 TIMING EXISTS" +
+        (job.metrics ? "   PROCESSED " + job.metrics.PROCESSED + "   REJECTED " + job.metrics.REJECTED : ""), "warn")]);
+    } else if (job.seconds != null) {
+      c.push([txt("  STEP010 SECONDS " + job.seconds + "s   RC=" + job.rc +
+        (job.metrics ? "   PROCESSED " + job.metrics.PROCESSED + "   REJECTED " + job.metrics.REJECTED : ""), "dim")]);
+    } else {
+      c.push([txt("  WAITING FOR STEP010 TO RETURN ...", running ? "bright" : "dim")]);
+    }
+    c.push([txt("  JOURNAL", "hdr")]);
+    job.journal.slice(-8).forEach(function (entry) {
+      c.push([txt("  " + entry.t + " ", "faint"), txt(pad(entry.line, COLS - 11), entry.tone || "info")]);
+    });
+    while (c.length < 13) c.push(blank(1));
+    c.push([txt("  SPOOL DISPLAY (SIMULATED -- DISPLAY ONLY, NOT JOB OUTPUT)", "warn")]);
+    var spool = jobSpoolRows(state).slice(-3);
+    if (!spool.length) c.push([txt("  (no rows revealed yet)", "faint")]);
+    spool.forEach(function (line) { c.push([txt("  " + pad(line, COLS - 3), "faint")]); });
+    while (c.length < 17) c.push(blank(1));
+    var verdict;
+    if (job.state === "error") verdict = txt("  JOB ABENDED: " + (job.error || "see journal"), "err");
+    else if (running) verdict = txt("  JOB RUNNING -- THE DELAY SHOWN IS THE REAL STEP010 WALL CLOCK.", "bright");
+    else if (job.metrics) {
+      var totals = "  COMPLETE  PROCESSED " + job.metrics.PROCESSED + "  REJECTED " + job.metrics.REJECTED +
+        "  TOTAL_CENTS " + job.metrics.TOTAL_CENTS;
+      verdict = txt(totals, job.mode === "simulated" ? "warn" : "num");
+    } else verdict = txt("  COMPLETE", "num");
+    c.push([verdict]);
+    return frame(state, "JOB OUTPUT", c);
+  }
+
+  function screenJournal(state) {
+    var c = [];
+    var runs = state.runs;
+    if (!runs) {
+      c.push(blank(1));
+      c.push([txt("  READING BATCH JOURNAL ...", "dim")]);
+    } else if (!runs.length) {
+      c.push(blank(1));
+      c.push([txt("  NO COMPLETED RUNS IN THIS SESSION.", "dim")]);
+    } else {
+      c.push([txt("  " + pad("JOB", 16) + " " + pad("WAREHOUSE", 10) + " " + pad("ACCT", 6, true) +
+        " " + pad("OPS", 6, true) + " " + pad("SECONDS", 9, true) + " " + pad("RC", 3, true) +
+        " " + pad("VERIFY", 7) + " " + pad("PROC", 6, true), "hdr")]);
+      runs.slice(0, 12).forEach(function (run) {
+        var verify = run.verify === true ? "PASS" : run.verify === false ? "FAIL" : "--";
+        var metrics = run.metrics || {};
+        c.push([txt("  " + pad(run.id, 16) + " " + pad(run.warehouse, 10) + " " +
+          pad(run.accounts, 6, true) + " " + pad(run.operations, 6, true) + " " +
+          (run.seconds == null ? pad("--", 9, true) : pad(run.seconds.toFixed(3), 9, true)) + " " +
+          pad(run.rc == null ? "--" : run.rc, 3, true) + " ", "dim"),
+          txt(pad(verify, 7), verify === "PASS" ? "num" : verify === "FAIL" ? "warn" : "faint"),
+          txt(" " + pad(metrics.PROCESSED == null ? "--" : metrics.PROCESSED, 6, true), "")]);
+      });
+    }
+    while (c.length < 17) c.push(blank(1));
+    c.push([txt("  COUNTERS ABOVE ARE THE VALUES THE JOB PRINTED; VERIFY COMPARES THEM WITH MODERN/BANK.PY.", "faint")]);
+    return frame(state, "BATCH JOURNAL", c);
+  }
+
+  function screenSystem(state) {
+    var c = [];
+    var e = state.engine || {};
+    c.push(blank(1));
+    c.push([txt("  BATCH ENGINE", "hdr")]);
+    c.push([txt("   LOCAL COBOL ....... " + (e.available ? "AVAILABLE" : "NOT AVAILABLE"), e.available ? "num" : "warn")]);
+    c.push([txt("   COBC .............. " + (e.cobc || "--"), "dim")]);
+    c.push([txt("   COBC VERSION ...... " + (e.cobc_version || "--"), "dim")]);
+    c.push([txt("   LEGACY SOURCE ..... " + (e.source || "legacy/bank.cob"), "dim")]);
+    c.push([txt("   COMPILED AT START . " + (e.compile_seconds == null ? "--" : e.compile_seconds + "s"), "dim")]);
+    c.push([txt("   NOTE .............. " + (e.note || "--"), "dim")]);
+    c.push(blank(1));
+    c.push([txt("  SESSION", "hdr")]);
+    c.push([txt("   OPERATOR .......... " + (state.user || "(not signed on)"), "")]);
+    c.push([txt("   SESSION ID ........ " + (state.session || "--"), "")]);
+    c.push([txt("   WAREHOUSE ......... " + state.warehouse + "  (" + (state.accountCount || "--") + " ACCOUNTS, " +
+      (state.operationCount || "--") + " OPERATIONS)", "")]);
+    c.push([txt("   SEED .............. " + state.seed, "")]);
+    c.push([txt("   FIXTURE SHA256 .... " + (state.fixtureDigest ? String(state.fixtureDigest).slice(0, 32) : "--"), "faint")]);
+    c.push([txt("   LEDGER STATE ...... " + state.ledgerState, "")]);
+    while (c.length < 18) c.push(blank(1));
+    return frame(state, "SYSTEM STATUS", c);
+  }
+
+  function screenHelp(state) {
+    var c = [];
+    c.push(blank(1));
+    c.push([txt("  PROGRAM FUNCTION KEYS", "hdr")]);
+    for (var i = 0; i < PF_KEYS.length; i += 3) {
+      var row = [txt("  ")];
+      for (var j = 0; j < 3 && i + j < PF_KEYS.length; j++) {
+        row.push(txt(pad("PF" + PF_KEYS[i + j].key + " " + PF_KEYS[i + j].label, 25), ""));
+      }
+      c.push(row);
+    }
+    c.push(blank(1));
+    c.push([txt("  COMMANDS", "hdr")]);
+    c.push([txt("   ACCT <id>   inquire on an account      OPS           operations queue", "dim")]);
+    c.push([txt("   BATCH       batch submission screen    RUN [S|M|L]   submit a job", "dim")]);
+    c.push([txt("   JOURNAL     completed runs             SYS           engine status", "dim")]);
+    c.push([txt("   MENU        operations menu            HELP          this screen", "dim")]);
+    c.push(blank(1));
+    c.push([txt("  DATA SOURCE", "hdr")]);
+    DISCLOSURE_LINES.forEach(function (line) { c.push([txt("   " + line, "warn")]); });
+    c.push([txt("   The batch is a real COBOL job when the helper server is running.", "faint")]);
+    return frame(state, "HELP", c);
+  }
+
+  function screenDisclosure(state) {
+    var c = [];
+    c.push(blank(1));
+    c.push([txt("  DISCLOSURE", "hdr")]);
+    c.push(blank(1));
+    c.push([txt("  BBS SG Bank is a fictional institution created for a hackathon demonstration.", "")]);
+    c.push([txt("  There are no real customers, accounts, credentials or banking integrations.", "")]);
+    c.push(blank(1));
+    c.push([txt("  Every number on this terminal is generated from a seed on this machine. The", "")]);
+    c.push([txt("  ACCOUNTS.DAT and OPERATIONS.DAT flat files are synthetic fixed-width records.", "")]);
+    c.push(blank(1));
+    c.push([txt("  When the helper server is running, STEP010 executes the unmodified", "bright")]);
+    c.push([txt("  legacy/bank.cob through a local GnuCOBOL compiler and the elapsed time and", "bright")]);
+    c.push([txt("  counters shown are that program's real output.", "bright")]);
+    c.push(blank(1));
+    c.push([txt("  When it is not reachable, the terminal says SIMULATED everywhere and replays", "warn")]);
+    c.push([txt("  the documented rules in the browser instead.", "warn")]);
+    c.push(blank(1));
+    c.push([txt("  PRESS PF3 TO RETURN.", "dim")]);
+    while (c.length < 18) c.push(blank(1));
+    return frame(state, "DISCLOSURE", c);
+  }
+
+  var SCREENS = ["logon", "menu", "accounts", "detail", "operations", "batch", "job", "journal", "system", "help", "disclosure"];
+
+  function buildScreen(state) {
+    switch (state.screen) {
+      case "logon": return screenLogon(state);
+      case "menu": return screenMenu(state);
+      case "accounts": return screenAccounts(state);
+      case "detail": return screenDetail(state);
+      case "operations": return screenOperations(state);
+      case "batch": return screenBatch(state);
+      case "job": return screenJob(state);
+      case "journal": return screenJournal(state);
+      case "system": return screenSystem(state);
+      case "disclosure": return screenDisclosure(state);
+      default: return screenHelp(state);
+    }
+  }
+
+  function renderScreen(state) {
+    return buildScreen(state).map(function (row) {
+      var used = 0, html = "";
+      for (var i = 0; i < row.length && used < COLS; i++) {
+        var seg = row[i];
+        var text = String(seg.t == null ? "" : seg.t);
+        if (used + text.length > COLS) text = text.slice(0, COLS - used);
+        used += text.length;
+        if (!text.length) continue;
+        html += seg.c ? '<span class="' + seg.c + '">' + esc(text) + "</span>" : esc(text);
+      }
+      return html + " ".repeat(Math.max(0, COLS - used));
+    }).join("\n");
+  }
+
+  // ------------------------------------------------------------ navigation
+  function go(state, screen, options) {
+    options = options || {};
+    if (!options.replace && state.screen !== screen) state.stack.push(state.screen);
+    state.screen = screen;
+    state.focus = 0;
+    var effects = [];
+    if (screen === "accounts" && options.page != null) state.page.accounts = options.page;
+    if (screen === "operations" && options.page != null) state.page.ops = options.page;
+    if (screen !== "accounts" && screen !== "detail") { /* keep cached page */ }
+    if (!state.offline) {
+      if (screen === "accounts") effects.push({ t: "load", key: "accounts" });
+      if (screen === "operations") effects.push({ t: "load", key: "ops" });
+      if (screen === "journal") effects.push({ t: "load", key: "journal" });
+      if (screen === "system") effects.push({ t: "load", key: "status" });
+    }
+    if (screen === "job" && state.job && state.job.state === "running" && !state.offline) {
+      effects.push({ t: "poll" });
+    }
+    return effects;
+  }
+
+  function back(state) {
+    if (state.screen === "logon") return [];
+    var previous = state.stack.pop();
+    if (!previous || previous === "logon") previous = "menu";
+    state.screen = previous;
+    state.focus = 0;
+    var effects = [];
+    if (!state.offline) {
+      if (previous === "accounts") effects.push({ t: "load", key: "accounts" });
+      if (previous === "operations") effects.push({ t: "load", key: "ops" });
+      if (previous === "journal") effects.push({ t: "load", key: "journal" });
+    }
+    return effects;
+  }
+
+  function page(state, delta) {
+    var effects = [];
+    if (state.screen === "accounts") {
+      state.page.accounts = Math.max(0, state.page.accounts + delta);
+      if (state.offline) state.accountPage = null;
+      else effects.push({ t: "load", key: "accounts" });
+    } else if (state.screen === "operations") {
+      state.page.ops = Math.max(0, state.page.ops + delta);
+      if (state.offline) state.opsPage = null;
+      else effects.push({ t: "load", key: "ops" });
+    }
+    return effects;
+  }
+
+  function selectOption(state, value) {
+    var effects = [];
+    var option = String(value || "").trim();
+    if (!option) { msg(state, "OPTION REQUIRED -- ENTER 1 THROUGH 6", "warn"); return effects; }
+    var screens = { "1": "accounts", "2": "operations", "3": "batch", "4": "journal", "5": "system", "6": "help" };
+    var target = screens[option];
+    if (!target) { msg(state, "OPTION " + option + " IS NOT VALID -- ENTER 1 THROUGH 6", "warn"); return effects; }
+    state.fields.option = "";
+    effects = go(state, target);
+    msg(state, "MENU OPTION " + option + " SELECTED", "info");
+    return effects;
+  }
+
+  // --------------------------------------------------------------- commands
+  function parseCommand(text) {
+    var raw = String(text || "").trim();
+    if (!raw) return { action: "none" };
+    var parts = raw.toUpperCase().split(/\s+/);
+    var verb = parts[0];
+    if (/^[1-6]$/.test(verb)) return { action: "option", value: verb };
+    switch (verb) {
+      case "MENU": return { action: "menu" };
+      case "ACCT": case "ACCOUNT": return { action: "acct", value: (parts[1] || "") };
+      case "OPS": case "QUEUE": return { action: "ops" };
+      case "BATCH": return { action: "batch" };
+      case "RUN": return { action: "run", value: (parts[1] || "") };
+      case "JOURNAL": case "JOBLOG": return { action: "journal" };
+      case "SYS": case "STATUS": return { action: "sys" };
+      case "HELP": return { action: "help" };
+      case "DISCLOSURE": return { action: "disclosure" };
+      case "RESET": return { action: "reset" };
+      case "LOGOFF": return { action: "logoff" };
+      case "PAGE": return { action: "page", value: (parts[1] || "") };
+      case "JOB": return { action: "job" };
+      default: return { action: "unknown", value: verb };
+    }
+  }
+
+  function submitCommand(state, text) {
+    var parsed = parseCommand(text);
+    var effects = [];
+    state.fields.cmd = "";
+    switch (parsed.action) {
+      case "none": msg(state, "ENTER A COMMAND OR PRESS A PROGRAM FUNCTION KEY", "warn"); break;
+      case "option": effects = selectOption(state, parsed.value); break;
+      case "menu": effects = go(state, "menu"); msg(state, "OPERATIONS MENU", "info"); break;
+      case "acct":
+        var digits = String(parsed.value || "").replace(/[^0-9]/g, "");
+        if (!digits) { msg(state, "ACCT REQUIRES AN 8-DIGIT ACCOUNT ID", "warn"); break; }
+        state.detailId = zpad(digits.slice(-8), 8);
+        effects = go(state, "detail");
+        msg(state, "ACCOUNT INQUIRY " + state.detailId, "info");
+        break;
+      case "ops": effects = go(state, "operations"); msg(state, "OPERATIONS QUEUE", "info"); break;
+      case "batch": effects = go(state, "batch"); msg(state, "BATCH SUBMISSION -- PF9 TO SUBMIT", "info"); break;
+      case "run": effects = startJob(state, parsed.value); break;
+      case "journal": effects = go(state, "journal"); msg(state, "BATCH JOURNAL", "info"); break;
+      case "sys": effects = go(state, "system"); msg(state, "SYSTEM STATUS", "info"); break;
+      case "help": effects = go(state, "help"); msg(state, "HELP", "info"); break;
+      case "disclosure": effects = go(state, "disclosure"); msg(state, "DISCLOSURE", "info"); break;
+      case "job": effects = go(state, "job"); msg(state, "JOB OUTPUT", "info"); break;
+      case "page":
+        var n = parseInt(parsed.value, 10);
+        if (!n || n < 1) { msg(state, "PAGE REQUIRES A POSITIVE NUMBER", "warn"); break; }
+        if (state.screen === "operations") state.page.ops = n - 1;
+        else state.page.accounts = n - 1;
+        effects = page(state, 0);
+        msg(state, "PAGE " + n, "info");
+        break;
+      case "reset":
+        effects.push({ t: "reset" });
+        msg(state, "RESET REQUESTED -- RESTORING OPENING LEDGER", "info");
+        break;
+      case "logoff": effects = logoff(state); break;
+      default: msg(state, "UNKNOWN COMMAND '" + parsed.value + "' -- PRESS PF1 FOR HELP", "warn");
+    }
+    return effects;
+  }
+
+  function logoff(state) {
+    state.user = "";
+    state.fields.userid = "";
+    state.fields.cmd = "";
+    state.stack = [];
+    state.screen = "logon";
+    state.focus = 0;
+    msg(state, "SESSION ENDED -- SIGN ON TO CONTINUE", "info");
+    return [];
+  }
+
+  function startJob(state, preset) {
+    var effects = [];
+    var letter = String(preset || state.fields.warehouse || "M").toUpperCase().slice(0, 1);
+    if (!LETTERS[letter]) { msg(state, "PRESET MUST BE S OR M OR L", "warn"); return effects; }
+    state.fields.warehouse = letter;
+    state.warehouse = LETTERS[letter];
+    state.seed = currentSeed(state);
+    if (state.offline) {
+      effects.push({ t: "offlineBatch", warehouse: state.warehouse, seed: state.seed });
+      msg(state, "NO COBOL ENGINE REACHABLE -- SIMULATED REPLAY ONLY", "warn");
+    } else {
+      effects.push({ t: "startJob", warehouse: state.warehouse, seed: state.seed, verify: String(state.fields.verify).toUpperCase() !== "N" });
+      msg(state, "JOB SUBMITTED TO NBATCH -- WAITING FOR STEP010", "info");
+    }
+    effects = effects.concat(go(state, "job", { replace: true }));
+    return effects;
+  }
+
+  function submitFocus(state) {
+    var active = activeField(state);
+    if (state.screen === "logon") {
+      var id = String(state.fields.userid || "").trim();
+      if (!id) { msg(state, "OPERATOR ID REQUIRED -- ENTER ANY NON-BLANK ID", "warn"); return []; }
+      state.user = id.toUpperCase().slice(0, 8);
+      state.fields.userid = state.user;
+      state.screen = "menu";
+      state.stack = [];
+      state.focus = 0;
+      var effects = go(state, "menu", { replace: true });
+      msg(state, "SIGN ON ACCEPTED -- " + state.user + " -- PLEASE SELECT AN OPTION", "info");
+      return effects;
+    }
+    if (active === "option") return selectOption(state, state.fields.option);
+    if (active === "warehouse" || active === "seed" || active === "verify") {
+      var list = focusList(state);
+      state.focus = Math.min(list.length - 1, list.indexOf(active) + 1);
+      msg(state, "PRESET " + state.fields.warehouse + "  SEED " + currentSeed(state) +
+        "  VERIFY " + (String(state.fields.verify).toUpperCase() === "N" ? "N" : "Y") + "  -- PF9 SUBMITS", "info");
+      return [];
+    }
+    return submitCommand(state, state.fields.cmd);
+  }
+
+  // ----------------------------------------------------------- key handling
+  function pressPf(state, key) {
+    var entry = null;
+    PF_KEYS.forEach(function (pf) { if (pf.key === key) entry = pf; });
+    var effects = [];
+    if (!entry) return effects;
+    switch (entry.id) {
+      case "help": effects = go(state, "help"); msg(state, "HELP -- PROGRAM FUNCTION KEYS AND COMMANDS", "info"); break;
+      case "menu": effects = go(state, "menu"); msg(state, "OPERATIONS MENU", "info"); break;
+      case "back": effects = back(state); msg(state, "RETURNED", "info"); break;
+      case "refresh":
+        if (!state.offline) {
+          effects.push({ t: "load", key: "status" });
+          if (state.screen === "accounts") effects.push({ t: "load", key: "accounts" });
+          if (state.screen === "operations") effects.push({ t: "load", key: "ops" });
+          if (state.screen === "journal") effects.push({ t: "load", key: "journal" });
+        }
+        msg(state, "DISPLAY REFRESHED", "info");
+        break;
+      case "reset": effects.push({ t: "reset" }); msg(state, "RESET REQUESTED", "info"); break;
+      case "pageup": effects = page(state, -1); msg(state, "PAGE UP", "info"); break;
+      case "pagedown": effects = page(state, 1); msg(state, "PAGE DOWN", "info"); break;
+      case "submit":
+        if (state.screen === "batch") effects = startJob(state, state.fields.warehouse);
+        else { effects = go(state, "batch"); msg(state, "GO TO BATCH SUBMISSION -- PF9 SUBMITS", "info"); }
+        break;
+      case "jobview":
+        effects = go(state, "job");
+        if (state.job && state.job.state === "running" && !state.offline) effects.push({ t: "poll" });
+        msg(state, "JOB OUTPUT", "info");
+        break;
+      case "discl": effects = go(state, "disclosure"); msg(state, "DISCLOSURE", "info"); break;
+      case "logoff": effects = logoff(state); break;
+      default: break;
+    }
+    return effects;
+  }
+
+  function handleKey(state, keyEvent) {
+    var key = keyEvent.key;
+    if (/^F([1-9]|1[0-2])$/.test(key)) {
+      return { effects: pressPf(state, parseInt(key.slice(1), 10)), handled: true };
+    }
+    if (key === "Enter") return { effects: submitFocus(state), handled: true };
+    if (key === "Tab") {
+      var list = focusList(state);
+      state.focus = (state.focus + 1) % list.length;
+      return { effects: [], handled: true };
+    }
+    if (key === "Backspace") {
+      var id = activeField(state);
+      state.fields[id] = String(state.fields[id] || "").slice(0, -1);
+      return { effects: [], handled: true };
+    }
+    if (key === "Escape") {
+      state.fields[activeField(state)] = "";
+      return { effects: [], handled: true };
+    }
+    if (key === "ArrowUp" || key === "PageUp") return { effects: page(state, -1), handled: true };
+    if (key === "ArrowDown" || key === "PageDown") return { effects: page(state, 1), handled: true };
+    if (key.length === 1 && !keyEvent.ctrlKey && !keyEvent.metaKey && !keyEvent.altKey) {
+      var target = activeField(state);
+      var width = { userid: 8, option: 1, warehouse: 1, seed: 8, verify: 1, cmd: 18 }[target] || 8;
+      var value = String(state.fields[target] || "");
+      if (width === 1) {
+        // Single-character selection fields take over on the first keystroke.
+        state.fields[target] = key === " " ? "" : key.toUpperCase();
+      } else if (value.length < width) {
+        state.fields[target] = value + key.toUpperCase();
+      }
+      return { effects: [], handled: true };
+    }
+    return { effects: [], handled: false };
+  }
+
+  // ------------------------------------------------------- data from server
+  function applyData(state, type, data) {
+    if (type === "status") {
+      state.engine = data.engine || state.engine;
+      state.session = data.session || state.session;
+      state.warehouses = data.warehouses || state.warehouses;
+      state.warehouse = data.warehouse || state.warehouse;
+      state.seed = data.seed != null ? data.seed : state.seed;
+      state.accountCount = data.account_count;
+      state.operationCount = data.operation_count;
+      state.fixtureDigest = data.fixture_digest;
+      state.ledgerState = data.ledger_state || state.ledgerState;
+      state.ledgerTotal = data.ledger_total_cents;
+      state.openingTotal = data.opening_total_cents;
+      state.fields.seed = String(state.seed);
+      state.fields.warehouse = (WAREHOUSES[state.warehouse] || {}).letter || "M";
+      state.offline = false;
+      state.source = "LIVE COBOL";
+      return;
+    }
+    if (type === "accounts") { state.accountPage = data; state.page.accounts = data.page; return; }
+    if (type === "ops") { state.opsPage = data; state.page.ops = data.page; return; }
+    if (type === "journal") { state.runs = data.runs || []; return; }
+    if (type === "job") {
+      state.job = data;
+      if (data && data.warehouse) state.warehouse = data.warehouse;
+      return;
+    }
+  }
+
+  // ------------------------------------------------ offline (simulated) job
+  function startOfflineJob(state, warehouse, seed, now) {
+    var spec = WAREHOUSES[warehouse] || WAREHOUSES.STANDARD;
+    state.warehouse = warehouse;
+    state.seed = seed;
+    state.local = null;
+    state.localKey = null;
+    var data = ensureLocal(state);
+    var id = "SIM" + String(now % 100000).padStart(6, "0");
+    var plan = [
+      { at: 0, tone: "warn", line: "*** SIMULATED RUN -- NO LOCAL COBOL ENGINE REACHABLE ***" },
+      { at: 0, tone: "warn", line: "ENGINE=js-replay  (documented rules; NOT legacy/bank.cob)" },
+      { at: 0, tone: "warn", line: "SUBMITTED JOB " + id + " -- DISPLAY DELAY IS SIMULATED" },
+      { at: 0, tone: "dim", line: "WAREHOUSE=" + warehouse + " ACCOUNTS=" + spec.accounts + " OPERATIONS=" + spec.operations },
+      { at: 0.25, tone: "dim", line: "SIMULATED heartbeat -- display only" },
+      { at: 0.7, tone: "dim", line: "SIMULATED heartbeat -- display only" },
+      { at: 1.1, tone: "dim", line: "SIMULATED heartbeat -- display only" },
+      { at: 1.4, tone: "warn", line: "SIMULATED RESULT -- REPLAY ONLY, NO JOB RAN" }
+    ];
+    state.job = {
+      id: id, state: "running", mode: "simulated", phase: "SIMULATED",
+      warehouse: warehouse, accounts: spec.accounts, operations: spec.operations,
+      seed: seed, verify: false, started_ms: now, elapsed_s: 0,
+      journal: [], plan: plan, planIndex: 0,
+      metrics: null, rc: null, seconds: null, error: null,
+      prediction: { processed: data.processed, rejected: data.rejected, matches: true },
+      spool: data.rows.slice(0, 48).map(function (r) { return r.line.replace(/\|/g, " "); }),
+      spool_simulated: true, completeAt: 1.6
+    };
+    state.ledgerState = "OPENING (SIMULATED RUN PENDING)";
+    return state.job;
+  }
+
+  function tickOfflineJob(state, now) {
+    var job = state.job;
+    if (!job || job.mode !== "simulated" || job.state !== "running") return false;
+    var elapsed = Math.max(0, (now - job.started_ms) / 1000);
+    job.elapsed_s = Math.round(elapsed * 1000) / 1000;
+    while (job.planIndex < job.plan.length && job.plan[job.planIndex].at <= elapsed) {
+      var step = job.plan[job.planIndex++];
+      job.journal.push({ seq: job.journal.length + 1, t: stamp(now).time, line: step.line, tone: step.tone });
+    }
+    if (elapsed >= job.completeAt) {
+      var local = ensureLocal(state);
+      job.state = "done";
+      job.phase = "SIMULATION ENDED";
+      job.metrics = { PROCESSED: local.processed, REJECTED: local.rejected, TOTAL_CENTS: local.closingTotal };
+      job.rc = 0; job.seconds = 0;
+      local.ledger = local.ledger; local.ledgerState = "REPLAY " + job.id + " (SIMULATED)";
+      state.ledgerState = local.ledgerState;
+      job.journal.push({ seq: job.journal.length + 1, t: stamp(now).time, line: "OUT> PROCESSED=" + zpad(local.processed, 8), tone: "ok" });
+      job.journal.push({ seq: job.journal.length + 1, t: stamp(now).time, line: "OUT> REJECTED=" + zpad(local.rejected, 8), tone: "ok" });
+      job.journal.push({ seq: job.journal.length + 1, t: stamp(now).time, line: "OUT> TOTAL_CENTS=" + zpad(local.closingTotal, 16) + "  (SIMULATED)", tone: "warn" });
+      job.journal.push({ seq: job.journal.length + 1, t: stamp(now).time, line: "SIMULATED JOB COMPLETE -- NO REAL ELAPSED TIME EXISTS", tone: "warn" });
+    }
+    return job.state === "running";
+  }
+
+  function resetLocal(state) {
+    state.local = null;
+    state.localKey = null;
+    var local = ensureLocal(state);
+    local.ledger = Object.assign({}, local.opening);
+    local.ledgerState = "OPENING";
+    state.ledgerState = "OPENING";
+    state.job = null;
+  }
+
+  var api = {
+    COLS: COLS, ROWS: ROWS, SCREENS: SCREENS, PF_KEYS: PF_KEYS, WAREHOUSES: WAREHOUSES,
+    DISCLOSURE: DISCLOSURE, DISCLOSURE_LINES: DISCLOSURE_LINES,
+    DEFAULT_SEED: DEFAULT_SEED, EDGE_CASE_COUNT: EDGE_CASE_COUNT,
+    createState: createState, buildScreen: buildScreen, renderScreen: renderScreen,
+    handleKey: handleKey, pressPf: pressPf, submitFocus: submitFocus, submitCommand: submitCommand,
+    parseCommand: parseCommand, selectOption: selectOption, go: go, back: back, page: page,
+    applyData: applyData, startOfflineJob: startOfflineJob, tickOfflineJob: tickOfflineJob,
+    resetLocal: resetLocal, startJob: startJob,
+    accountRowsPayload: accountRowsPayload, operationsPayload: operationsPayload,
+    localWarehouse: localWarehouse, replayOps: replayOps,
+    fmtMoney: fmtMoney, money: money, pad: pad, zpad: zpad, activeField: activeField, focusList: focusList,
+    ensureLocal: ensureLocal, activeFieldId: function (state) { return activeField(state); }
+  };
+
+  global.BbsTerminal = api;
+  if (typeof module === "object" && module && module.exports) module.exports = api;
+})(typeof globalThis !== "undefined" ? globalThis : this);
+</script>
+
+<!-- DOM wiring: only runs in a browser. -->
+<script id="terminal-wiring">
+(function () {
+  "use strict";
+  var T = window.BbsTerminal;
+  if (!T || typeof document === "undefined") return;
+
+  var params = new URLSearchParams(window.location.search);
+  var ENGINE = (params.get("engine") || "").replace(/\/$/, "");
+  var POLL_MS = 250;
+
+  var el = {
+    screen: document.getElementById("screen"),
+    keypad: document.getElementById("keypad"),
+    led: document.getElementById("led"),
+    engine: document.getElementById("engine-label"),
+    docMode: document.getElementById("doc-mode"),
+    docEngine: document.getElementById("doc-engine"),
+    docSession: document.getElementById("doc-session"),
+    docWarehouse: document.getElementById("doc-warehouse")
+  };
+
+  var state = T.createState();
+  var pollTimer = null;
+
+  function api(path, options) {
+    return fetch(ENGINE + path, options).then(function (response) {
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      return response.json();
+    });
+  }
+
+  function paint() {
+    try {
+      el.screen.innerHTML = T.renderScreen(state);
+    } catch (error) {
+      el.screen.innerHTML = " DISPLAY ERROR -- " + String(error && error.message) + "\n PRESS PF2 FOR THE MENU";
+    }
+    el.led.classList.toggle("is-live", !state.offline);
+    el.engine.textContent = state.offline
+      ? "engine: unreachable — labelled SIMULATED mode"
+      : "engine: local cobc " + (state.engine.cobc_version || "ready");
+    el.docMode.textContent = state.offline ? "SIMULATED (embedded data)" : "LIVE COBOL (local)";
+    el.docEngine.textContent = state.offline
+      ? (state.engine.note || "no helper server reachable")
+      : (state.engine.path || "compiled legacy-bank");
+    el.docSession.textContent = state.session ? state.session + " · " + state.user : (state.user || "—");
+    el.docWarehouse.textContent = state.warehouse + " · " + (state.accountCount == null ? "—" : T.money(state.accountCount));
+  }
+
+  function buildKeypad() {
+    var enter = document.createElement("button");
+    enter.className = "key--go";
+    enter.innerHTML = "ENTER<small>send</small>";
+    enter.addEventListener("click", function () {
+      el.screen.focus();
+      run(T.submitFocus(state));
+    });
+    el.keypad.appendChild(enter);
+    T.PF_KEYS.forEach(function (pf) {
+      var button = document.createElement("button");
+      button.innerHTML = "PF" + pf.key + "<small>" + pf.label + "</small>";
+      button.addEventListener("click", function () {
+        el.screen.focus();
+        run(T.pressPf(state, pf.key));
+      });
+      el.keypad.appendChild(button);
+    });
+  }
+
+  function handleEffect(effect) {
+    switch (effect.t) {
+      case "load":
+        if (effect.key === "accounts") {
+          api("/api/accounts?page=" + state.page.accounts + "&size=" + state.pageSize)
+            .then(function (data) { T.applyData(state, "accounts", data); paint(); })
+            .catch(function () { state.offline = true; paint(); });
+        } else if (effect.key === "ops") {
+          api("/api/operations?page=" + state.page.ops + "&size=" + state.pageSize)
+            .then(function (data) { T.applyData(state, "ops", data); paint(); })
+            .catch(function () { state.offline = true; paint(); });
+        } else if (effect.key === "journal") {
+          api("/api/journal").then(function (data) { T.applyData(state, "journal", data); paint(); })
+            .catch(function () { state.offline = true; paint(); });
+        } else if (effect.key === "status") {
+          api("/api/status").then(function (data) { T.applyData(state, "status", data); paint(); })
+            .catch(function () { state.offline = true; paint(); });
+        }
+        break;
+      case "startJob":
+        api("/api/batch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ warehouse: effect.warehouse, seed: effect.seed, verify: effect.verify, mode: "cobol" })
+        }).then(function (job) {
+          T.applyData(state, "job", job);
+          paint();
+          schedulePoll();
+        }).catch(function (error) {
+          var noEngine = /503/.test(error.message);
+          if (noEngine) {
+            T.startOfflineJob(state, effect.warehouse, effect.seed, Date.now());
+            state.message = { text: "COBOL ENGINE UNAVAILABLE -- SIMULATED REPLAY, NO JOB RUNNING", tone: "warn" };
+            paint();
+            startOfflineTick();
+            return;
+          }
+          state.message = { text: "JOB SUBMISSION REFUSED: " + error.message + " -- PRESS PF1", tone: "err" };
+          paint();
+        });
+        break;
+      case "poll":
+        schedulePoll();
+        break;
+      case "offlineBatch":
+        T.startOfflineJob(state, effect.warehouse, effect.seed, Date.now());
+        state.message = { text: "SIMULATED RUN -- NO COBOL JOB IS EXECUTING", tone: "warn" };
+        paint();
+        startOfflineTick();
+        break;
+      case "reset":
+        if (state.offline) { T.resetLocal(state); paint(); }
+        else api("/api/reset", { method: "POST", body: "{}" }).then(function (data) {
+          T.applyData(state, "status", data);
+          T.applyData(state, "job", null);
+          paint();
+        }).catch(function () { state.offline = true; paint(); });
+        break;
+      default:
+        break;
+    }
+  }
+
+  function run(result) {
+    paint();
+    var effects = Array.isArray(result) ? result : (result && result.effects) || [];
+    effects.forEach(handleEffect);
+  }
+
+  function schedulePoll() {
+    if (pollTimer) return;
+    pollTimer = window.setTimeout(function () {
+      pollTimer = null;
+      api("/api/batch").then(function (job) {
+        T.applyData(state, "job", job);
+        paint();
+        if (job && job.state === "running") { schedulePoll(); return; }
+        api("/api/accounts?page=" + state.page.accounts + "&size=" + state.pageSize)
+          .then(function (data) { T.applyData(state, "accounts", data); paint(); });
+        api("/api/journal").then(function (data) { T.applyData(state, "journal", data); paint(); });
+      }).catch(function () { state.offline = true; paint(); });
+    }, POLL_MS);
+  }
+
+  var offlineTimer = null;
+  function startOfflineTick() {
+    if (offlineTimer) return;
+    offlineTimer = window.setInterval(function () {
+      var running = T.tickOfflineJob(state, Date.now());
+      paint();
+      if (!running) { window.clearInterval(offlineTimer); offlineTimer = null; }
+    }, 80);
+  }
+
+  el.screen.addEventListener("keydown", function (event) {
+    if (event.ctrlKey || event.metaKey) return;
+    if (event.key === "Tab" || /^F([1-9]|1[0-2])$/.test(event.key) || event.key === "Enter") event.preventDefault();
+    var result = T.handleKey(state, event);
+    if (result.handled) run(result);
+  });
+  el.screen.addEventListener("mousedown", function () { el.screen.focus(); });
+  window.addEventListener("keydown", function (event) {
+    if (document.activeElement === el.screen) return;
+    if (/^F([1-9]|1[0-2])$/.test(event.key)) { event.preventDefault(); run(T.pressPf(state, parseInt(event.key.slice(1), 10))); }
+  });
+
+  buildKeypad();
+  paint();
+
+  api("/api/status").then(function (data) {
+    T.applyData(state, "status", data);
+    paint();
+    return api("/api/accounts?page=0&size=" + state.pageSize);
+  }).then(function (data) {
+    T.applyData(state, "accounts", data);
+    paint();
+  }).catch(function () {
+    state.offline = true;
+    state.source = "SIMULATED";
+    state.engine = { available: false, note: "helper server not reachable; SIMULATED mode" };
+    state.message = { text: "ENGINE UNREACHABLE -- SIMULATED MODE. START legacy-ui/run.sh FOR THE REAL COBOL JOB.", tone: "warn" };
+    paint();
+  });
+
+  window.setInterval(function () {
+    state.now = Date.now();
+    paint();
+  }, 1000);
+})();
+</script>
+</body>
+</html>
