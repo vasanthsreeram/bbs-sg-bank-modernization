@@ -11,12 +11,12 @@ Legend: `[x]` done + evidence · `[~]` partial · `[ ]` not done / blocked.
 
 | | Requirement | Status | Evidence / placeholder |
 |---|---|---|---|
-| A1 | **Hosted** working prototype URL | `[ ]` ⛔ | `{HOSTED_URL}` |
-| A2 | **Short demo** (≤3 min) | `[ ]` ⛔ | `{DEMO_VIDEO_URL}`; script ready [`05-demo-script.md`](05-demo-script.md) |
+| A1 | **Hosted** working prototype URL | `[ ]` ⛔ | `https://bbs-sg-bank-demo.pages.dev` |
+| A2 | **Short demo** (≤3 min) | `[ ]` ⛔ | `https://bbs-sg-bank-demo.pages.dev/media/bbs-sg-bank-demo.mp4`; script ready [`05-demo-script.md`](05-demo-script.md) |
 | A3 | **Before/after** explanation | `[x]` ✅ | [`02-before-after.md`](02-before-after.md) |
 | A4 | **Original public post per team member** (Medium or LinkedIn) | `[ ]` ⛔ | [`06-social-posts.md`](06-social-posts.md); URLs `{MEMBER_n_POST_URL}` |
 | A5 | Built **substantially with Opsera Forge** | `[~]` 🟡 | project created; **Assessment complete** (57/100, 10 findings; raw report not exported; `docs/forge/assessment.md` is a team transcript); **Intent v1 + PRD-Spec v1 + Architecture v1 + User Stories v1 approved and exported**, **Testing v1 generated and exported (not approved)** to `docs/forge/`; **Delivery pending** ([`04-...`](04-forge-pipeline-mapping.md)) |
-| A6 | Public repo | `[ ]` ⛔ | `{REPO_URL}` |
+| A6 | Public repo | `[ ]` ⛔ | `https://github.com/vasanthsreeram/bbs-sg-bank-modernization` |
 
 ---
 
@@ -34,7 +34,7 @@ Legend: `[x]` done + evidence · `[~]` partial · `[ ]` not done / blocked.
 | B1.6 | Parity AT-12 (legacy ↔ modern, byte-identical) | `[x]` ✅ | `parity … byte-identical: YES` in all `scripts/evidence/benchmark-*.txt` |
 | B1.7 | Demo app runs locally | `[x]` ✅ | `site/backend/app.py` (50 site tests), smoke-tested 2026-09-23 |
 | B1.8 | Terminal runs the **real** COBOL batch | `[x]` ✅ | `legacy-ui/` (20 tests): live 1,200×400 job → 400 processed, 3 rejected, 1.197 s actual COBOL execution (1.234 s overall), modern `TOTAL_CENTS` 5489403400 |
-| B1.9 | Hosted, clickable prototype (public URL) | `[ ]` ⛔ | `{HOSTED_URL}` |
+| B1.9 | Hosted, clickable prototype (public URL) | `[ ]` ⛔ | `https://bbs-sg-bank-demo.pages.dev` |
 
 ### B2 — Substantial Opsera Forge use (30%)
 
@@ -48,7 +48,7 @@ Legend: `[x]` done + evidence · `[~]` partial · `[ ]` not done / blocked.
 | B2.6 | Architecture artifact exported | `[x]` ✅ | v1 completed (~100% confidence), approved and downloaded to `docs/forge/architecture.md` (SHA-256 `d0be1c535a37…058b`) |
 | B2.7 | User Stories / work orders | `[x]` ✅ | User Stories **v1** (6 epics / 33 **proposed** stories, ~75% confidence), approved and downloaded to `docs/forge/work-orders.md` (SHA-256 `a78ac60579ae…cd0d2`) |
 | B2.8 | Testing artifact exported | `[x]` ✅ | Testing **v1** — 132 **proposed** cases (33 functional / 33 smoke / 33 regression / 33 performance), **generated and exported (not approved** — no Approve action shown) to `docs/forge/testing.md` (SHA-256 `19749260605e…92b3`). **Not executed tests**; local suites 108 passing |
-| B2.9 | Delivery record + hosted app | `[ ]` ⛔ | Delivery stage pending; `docs/forge/delivery.md`; `{HOSTED_URL}` |
+| B2.9 | Delivery record + hosted app | `[ ]` ⛔ | Delivery stage pending; `docs/forge/delivery.md`; `https://bbs-sg-bank-demo.pages.dev` |
 | B2.10 | MCP export credential | `[ ]` 🚫 | supplied `forge_` token → HTTP 401 `Invalid or revoked token`; **signed-in browser downloads work** and were used to export Intent v1 / PRD-Spec v1 |
 
 ### B3 — Modernization impact (15%)
@@ -67,7 +67,7 @@ Legend: `[x]` done + evidence · `[~]` partial · `[ ]` not done / blocked.
 | B4.1 | Polished slide deck | `[x]` ✅ | [`slides/index.html`](../slides/index.html), [`slides/SLIDES.md`](../slides/SLIDES.md) |
 | B4.2 | Demo script timed ≤3 min | `[x]` ✅ | [`05-demo-script.md`](05-demo-script.md) |
 | B4.3 | Deck rehearsed end-to-end | `[ ]` ⛔ | — |
-| B4.4 | Demo recorded | `[ ]` ⛔ | `{DEMO_VIDEO_URL}` |
+| B4.4 | Demo recorded | `[ ]` ⛔ | `https://bbs-sg-bank-demo.pages.dev/media/bbs-sg-bank-demo.mp4` |
 
 ### B5 — Content (10%)
 
@@ -96,7 +96,7 @@ Legend: `[x]` done + evidence · `[~]` partial · `[ ]` not done / blocked.
 - [ ] Hosted URL loads on a clean browser (no auth).
 - [ ] Demo video is public and ≤3:00.
 - [ ] Each member's post is public, original, and names their own contribution.
-- [ ] `{DATE}` fields updated.
+- [ ] `23 September 2026` fields updated.
 
 ---
 

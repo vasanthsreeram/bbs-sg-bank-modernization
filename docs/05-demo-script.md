@@ -1,7 +1,7 @@
 # 05 — Demo Script (2–3 minutes)
 
 **Target length:** 2:30 (hard cap 3:00). **Presenter:** `{PRESENTER_NAME}`.
-**Recording:** `{DEMO_VIDEO_URL}` · **Live app:** `{HOSTED_URL}`.
+**Recording:** `https://bbs-sg-bank-demo.pages.dev/media/bbs-sg-bank-demo.mp4` · **Live app:** `https://bbs-sg-bank-demo.pages.dev`.
 
 Rule for this demo: **show, don't claim.** We show the legacy code, run the modern batch
 through the actual demo app, run both test suites, and show the measured parity/benchmark
@@ -12,7 +12,7 @@ synthetic and the legacy design deliberately inefficient (see `02-before-after.m
 
 ## Pre-flight checklist (do before recording)
 
-- [ ] Hosted app reachable at `{HOSTED_URL}`; otherwise run locally:
+- [ ] Hosted app reachable at `https://bbs-sg-bank-demo.pages.dev`; otherwise run locally:
       `python3 site/backend/app.py --open` (defaults to `http://127.0.0.1:8765/`).
 - [ ] `legacy/bank.cob` open at the two bottleneck comments (L108, L133) in a side tab.
 - [ ] Forge project tab open: `https://hackathon.softwareforge.ai/projects/6de0abcc-6025-4b07-9e5c-2308e8f4fe10` (Assessment complete, ForgeScore 57/100; Intent v1, PRD-Spec v1, Architecture v1 and User Stories v1 approved and exported, Testing v1 generated and exported, to `docs/forge/`; Delivery pending).

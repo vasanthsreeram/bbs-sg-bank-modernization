@@ -161,7 +161,7 @@ MCP endpoint `POST /api/mcp` with `Authorization: Bearer forge_<token>` (token f
 | Purpose | Ship the modernized system and its evidence. |
 | Forge artifact | Delivery/release record; the hosted app. |
 | Mechanism | Forge delivery/ship stage; deploy hosted prototype; record release. |
-| Repo landing zone | `docs/forge/delivery.md`; `{HOSTED_URL}`; `{DEMO_VIDEO_URL}`. |
+| Repo landing zone | `docs/forge/delivery.md`; `https://bbs-sg-bank-demo.pages.dev`; `https://bbs-sg-bank-demo.pages.dev/media/bbs-sg-bank-demo.mp4`. |
 | Status | ⛔ Pending — project exists; artifact not yet exported. |
 | Team-authored stand-in | [`07-submission-checklist.md`](07-submission-checklist.md); `slides/`. |
 

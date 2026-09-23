@@ -4,7 +4,7 @@
 **Scope:** `legacy/bank.cob` → `modern/bank.py`, parity-checked by `scripts/benchmark.py`,
 wrapped by the demo app in `site/`.
 **Owner of this doc:** `{TEAM_NAME}`.
-**Last updated:** `{DATE}` (2026-09-23).
+**Last updated:** `23 September 2026` (2026-09-23).
 
 > **How to read this file.** This is a *truthful* journal. A step is only ✅ when its
 > evidence cell points at something a judge can re-run **today**. Steps without evidence are
@@ -113,8 +113,8 @@ behaviour continuously re-verifiable by an automated parity test.*
 | # | Step | Status | Evidence | Notes |
 |---|---|---|---|---|
 | 6.1 | Demo app runs locally | ✅ | `python3 site/backend/app.py --port 8791`; `GET /api/health` → `{"status":"ok","fictional":true}`; `GET /` → 200 | Verified 2026-09-23. |
-| 6.2 | Hosted prototype deployed to a public URL | ⛔ | placeholder `{HOSTED_URL}` | **Required for submission.** The app is deployable; only hosting remains. |
-| 6.3 | Short demo recorded (≤3 min) | ⛔ | placeholder `{DEMO_VIDEO_URL}` | Script ready in [`05-demo-script.md`](05-demo-script.md). |
+| 6.2 | Hosted prototype deployed to a public URL | ⛔ | placeholder `https://bbs-sg-bank-demo.pages.dev` | **Required for submission.** The app is deployable; only hosting remains. |
+| 6.3 | Short demo recorded (≤3 min) | ⛔ | placeholder `https://bbs-sg-bank-demo.pages.dev/media/bbs-sg-bank-demo.mp4` | Script ready in [`05-demo-script.md`](05-demo-script.md). |
 | 6.4 | Before/after write-up | ✅ | [`02-before-after.md`](02-before-after.md) | Complete, evidence-linked. |
 | 6.5 | Per-teammate public post | ⛔ | `{MEMBER_n_POST_URL}` | Outlines ready in [`06-social-posts.md`](06-social-posts.md). |
 | 6.6 | Submission checklist signed | 🟡 | [`07-submission-checklist.md`](07-submission-checklist.md) | Open gates: public hosting, demo recording, per-member posts, and the raw Assessment export. |
@@ -129,7 +129,7 @@ behaviour continuously re-verifiable by an automated parity test.*
 |---|---|---|
 | ~~5.1, 5.2~~ | ~~GnuCOBOL `cobc`~~ | **Resolved 2026-09-23:** isolated GnuCOBOL 3.2.0 built by `scripts/get_cobc.sh`; parity and timings captured under `scripts/evidence/`. |
 | Export remaining Forge artifacts (raw Assessment report, Delivery) | Forge artifact-export credential | Forge project **already created**; Assessment **complete** (raw report unexported; `docs/forge/assessment.md` is a team transcript); Intent v1, PRD-Spec v1, Architecture v1 and User Stories v1 **approved and downloaded**, and Testing v1 **generated and downloaded** (no Approve action shown), to `docs/forge/`. The supplied MCP `forge_` token returns HTTP 401 `Invalid or revoked token`, but **signed-in browser downloads work** (that is how the exports were retrieved). Use browser downloads for the rest, or issue a fresh token (Profile → API Tokens). |
-| 6.2 | Public hosting target | Deploy `site/backend/app.py`; set `{HOSTED_URL}`. |
+| 6.2 | Public hosting target | Deploy `site/backend/app.py`; set `https://bbs-sg-bank-demo.pages.dev`. |
 | 6.3, 6.5 | Recording + publishing | Follow `05-`/`06-`; set the placeholder URLs. |
 
 ---

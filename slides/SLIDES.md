@@ -24,7 +24,7 @@ A truthful, evidence-linked legacy modernization — the planning driven through
 Pipeline chips: 1 Assessment · 2 Intent · 3 PRD-Spec · 4 Architecture · 5 User Stories ·
 6 Testing · 7 Delivery — pending.
 
-`{TEAM_NAME}` · `{DATE}` · hosted: `{HOSTED_URL}`
+`{TEAM_NAME}` · `23 September 2026` · hosted: `https://bbs-sg-bank-demo.pages.dev`
 
 *Right:* screenshot of the local demo app overview (legacy panel beside modern panel).
 
@@ -230,7 +230,7 @@ per-member posts, deck not yet rehearsed.
 | `{MEMBER_3_NAME}` | Parity harness + tests | `{MEMBER_3_POST_URL}` |
 | `{MEMBER_4_NAME}` | Forge pipeline lead + delivery | `{MEMBER_4_POST_URL}` |
 
-Repo `{REPO_URL}` · Demo `{DEMO_VIDEO_URL}` · Hosted `{HOSTED_URL}`
+Repo `https://github.com/vasanthsreeram/bbs-sg-bank-modernization` · Demo `https://bbs-sg-bank-demo.pages.dev/media/bbs-sg-bank-demo.mp4` · Hosted `https://bbs-sg-bank-demo.pages.dev`
 
 *Bottom band:* the four commands that reproduce the evidence —
 `python3 scripts/test_bank.py` (33 tests) · `python3 tests/test_modern.py` (5 tests) ·
@@ -280,8 +280,8 @@ labels are visible in the images, so the deck does not imply real customers or d
 |---|---|
 | `{TEAM_NAME}`, `{PRESENTER_NAME}` | Names |
 | `{MEMBER_n_NAME}`, `{MEMBER_n_POST_URL}` | Team + posts |
-| `{REPO_URL}`, `{DEMO_VIDEO_URL}`, `{HOSTED_URL}` | Links |
-| `{EVENT_NAME}`, `{DATE}` | Event + date |
+| `https://github.com/vasanthsreeram/bbs-sg-bank-modernization`, `https://bbs-sg-bank-demo.pages.dev/media/bbs-sg-bank-demo.mp4`, `https://bbs-sg-bank-demo.pages.dev` | Links |
+| `SF Enterprise Hackathon 2.0`, `23 September 2026` | Event + date |
 
 ## Viewing & controls
 

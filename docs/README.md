@@ -65,7 +65,7 @@ This pack is written so a judge can re-run every claim. We follow three hard rul
 | Forge **User Stories** artifact (v1) | ✅ approved + exported | **6 epics / 33 proposed stories** at ~75% reported confidence, approved and downloaded to [`docs/forge/work-orders.md`](forge/work-orders.md) — SHA-256 `a78ac60579ae…cd0d2`. Proposed work, **not implemented**. |
 | Forge **Testing** artifact (v1) | ✅ generated + exported (not approved) | **132 proposed test cases** (33 functional / 33 smoke / 33 regression / 33 performance) **generated and downloaded — not approved, as the browser page showed no Approve action** — to [`docs/forge/testing.md`](forge/testing.md) — SHA-256 `19749260605e…92b3`. A **generated planning artifact, not 132 executed tests**; the executable local suites are **108 passing** (33 + 5 + 50 + 20). |
 | Forge **Delivery** artifact | ⛔ pending | not generated/exported; public hosting and the demo video remain open. The supplied `forge_` token returns HTTP 401 `Invalid or revoked token`, so artifacts are retrieved via **signed-in browser downloads** (which work). |
-| Hosted prototype URL (public) | ⛔ pending | app runs locally; `{HOSTED_URL}` not yet deployed. |
+| Hosted prototype URL (public) | ⛔ pending | app runs locally; `https://bbs-sg-bank-demo.pages.dev` not yet deployed. |
 
 > **Speedup disclosure (required):** the numbers above compare a **deliberately
 > inefficient** legacy whole-file batch (`bank.cob`: rescan + full-file rewrite per
@@ -153,13 +153,13 @@ Replace before submission (search the repo for `{`):
 
 | Placeholder | Meaning |
 |---|---|
-| `{EVENT_NAME}` | Official hackathon name |
-| `{HOSTED_URL}` | Public URL of the hosted prototype |
-| `{DEMO_VIDEO_URL}` | Public link to the ≤3-min demo recording |
-| `{REPO_URL}` | Public repository URL |
+| `SF Enterprise Hackathon 2.0` | Official hackathon name |
+| `https://bbs-sg-bank-demo.pages.dev` | Public URL of the hosted prototype |
+| `https://bbs-sg-bank-demo.pages.dev/media/bbs-sg-bank-demo.mp4` | Public link to the ≤3-min demo recording |
+| `https://github.com/vasanthsreeram/bbs-sg-bank-modernization` | Public repository URL |
 | `{TEAM_NAME}` / `{MEMBER_n_NAME}` | Team + member names |
 | `{MEMBER_n_POST_URL}` | Published Medium/LinkedIn post per member |
-| `{DATE}` | Submission date |
+| `23 September 2026` | Submission date |
 
 > Ownership note: this pack is authored inside `docs/` and `slides/` only. It describes the
 > code in `legacy/`, `modern/`, `scripts/`, `tests/`, and `site/` as it exists on disk; no

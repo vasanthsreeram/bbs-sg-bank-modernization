@@ -57,7 +57,7 @@ it gets slower every year — and neither is about how fast COBOL is."*
    matters for compatibility.
 5. What surprised me about reading legacy code `{MEMBER_1_SURPRISE}`.
 6. One takeaway: *find the cost before you find the replacement.*
-7. Links: `{REPO_URL}`, demo `{DEMO_VIDEO_URL}`, hosted `{HOSTED_URL}`.
+7. Links: `https://github.com/vasanthsreeram/bbs-sg-bank-modernization`, demo `https://bbs-sg-bank-demo.pages.dev/media/bbs-sg-bank-demo.mp4`, hosted `https://bbs-sg-bank-demo.pages.dev`.
 8. Hashtags: #LegacyModernization #COBOL #SoftwareEngineering #Hackathon.
 
 **Medium outline (~600–900 words):** expand with the exact offsets table, a before/after
@@ -167,6 +167,6 @@ how we'd have done it by hand, and the submission checklist.
 
 - [ ] One post per member, each **public** and **original**.
 - [ ] Each post names that member's actual contribution (not "the team").
-- [ ] Each post links `{REPO_URL}` and, where relevant, `{DEMO_VIDEO_URL}` / `{HOSTED_URL}`.
+- [ ] Each post links `https://github.com/vasanthsreeram/bbs-sg-bank-modernization` and, where relevant, `https://bbs-sg-bank-demo.pages.dev/media/bbs-sg-bank-demo.mp4` / `https://bbs-sg-bank-demo.pages.dev`.
 - [ ] Any quoted speedup carries the synthetic-workload disclosure and links a transcript.
 - [ ] Paste final URLs into the ownership map and into `07-submission-checklist.md`.

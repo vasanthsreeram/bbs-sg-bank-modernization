@@ -146,7 +146,7 @@ modern **rejects** duplicate account IDs and 12-digit balance overflow while leg
 duplicate rows and truncates the overflow — is intentional and covered by tests (see
 `02-before-after.md` §4.3). The remaining caveat is **operational**, not correctness:
 these were run **locally** with the isolated compiler, not yet against the public hosted
-prototype (no `{HOSTED_URL}`).
+prototype (no `https://bbs-sg-bank-demo.pages.dev`).
 
 ### Next actions
 1. Add a `tests/__init__.py` (or a pytest wrapper) so both suites run via one command.
