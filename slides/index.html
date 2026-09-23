@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>BBS SG Bank — COBOL → Modern | {TEAM_NAME}</title>
+<title>BBS SG Bank — COBOL → Modern | BBS SG Bank modernization</title>
 <meta name="description" content="BBS SG Bank: from flat-file COBOL to an indexed batch. A truthful, evidence-linked legacy modernization driven through the Opsera Forge pipeline. Fictional bank, synthetic demo data." />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232456d6'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='13' font-weight='700' fill='%23fff' text-anchor='middle'%3EBBS%3C/text%3E%3C/svg%3E" />
 <style>
@@ -162,7 +162,7 @@
         <div style="margin-top:18px;display:flex;align-items:center;gap:14px">
           <span style="width:38px;height:38px;border-radius:11px;background:var(--pri);color:#fff;font:800 12px/38px var(--mono);text-align:center">BBS</span>
           <div>
-            <div class="brand" style="font-size:15px">{TEAM_NAME}</div>
+            <div class="brand" style="font-size:15px">BBS SG Bank modernization</div>
             <div class="small muted">23 September 2026 · hosted: https://bbs-sg-bank-demo.pages.dev</div>
           </div>
         </div>
@@ -494,14 +494,14 @@ modern = run(<span class="s">"python3 modern/bank.py"</span>)
         <ul>
           <li><span class="pill pend">🟡</span> Forge Delivery pending; raw Assessment report not exported</li>
           <li><span class="pill pend">🟡</span> Remaining Forge exports (MCP token 401; browser downloads work)</li>
-          <li><span class="pill blk">⛔</span> Public hosted URL</li>
-          <li><span class="pill blk">⛔</span> Demo recording</li>
+          <li><span class="pill ok">✅</span> Public hosted interactive app (Worker)</li>
+          <li><span class="pill ok">✅</span> 73-second public demo recording</li>
           <li><span class="pill blk">⛔</span> Per-member public posts</li>
           <li><span class="pill blk">⛔</span> Deck not yet rehearsed end-to-end</li>
         </ul>
         <div class="callout" style="margin-top:14px">Showing the open list is intentional — it is the same state as the submission checklist, so no claim here outruns its evidence.</div>
       </div>
-      <div class="takeaway" style="margin-top:18px"><b>Current defensible claim:</b> a modern, linear-time batch that passes AT-1…AT-13 with 33 + 5 core tests (plus 50 site and 20 terminal), byte-identical legacy/modern parity, and measured <b>28.6× / 128.1×</b> on synthetic fixtures against a deliberately inefficient legacy design — wrapped in a working local demo app and an operator terminal that runs the real COBOL; the raw Assessment export, public hosting, demo recording and Forge Delivery are still pending.</div>
+      <div class="takeaway" style="margin-top:18px"><b>Current defensible claim:</b> a modern, linear-time batch that passes AT-1…AT-13 with 33 + 5 core tests (plus 50 site and 20 terminal), byte-identical legacy/modern parity, and measured <b>28.6× / 128.1×</b> on synthetic fixtures against a deliberately inefficient legacy design — wrapped in a hosted JavaScript-port demo and a local operator terminal that runs real COBOL; the raw Assessment export and Forge Delivery are still pending.</div>
     </div>
     <footer><span class="brand"><b>BBS</b> SG Bank</span><span class="foot-tag">10 / 12</span></footer>
   </section>
@@ -509,21 +509,15 @@ modern = run(<span class="s">"python3 modern/bank.py"</span>)
   <!-- ==================== 11 · TEAM ==================== -->
   <section class="slide" aria-label="Team and links">
     <p class="kicker">Team &amp; links</p>
-    <h2>{TEAM_NAME}</h2>
+    <h2>BBS SG Bank modernization</h2>
     <div class="body">
-      <table>
-        <tr><th>Member</th><th>Contribution</th><th>Post</th></tr>
-        <tr><td><b>{MEMBER_1_NAME}</b></td><td>Legacy assessment / COBOL analysis</td><td>{MEMBER_1_POST_URL}</td></tr>
-        <tr><td><b>{MEMBER_2_NAME}</b></td><td>Architecture + modern implementation</td><td>{MEMBER_2_POST_URL}</td></tr>
-        <tr><td><b>{MEMBER_3_NAME}</b></td><td>Parity harness + tests</td><td>{MEMBER_3_POST_URL}</td></tr>
-        <tr><td><b>{MEMBER_4_NAME}</b></td><td>Forge pipeline lead + delivery</td><td>{MEMBER_4_POST_URL}</td></tr>
-      </table>
+      <p class="muted">Project links and evidence for the hackathon entry. Individual contributors and their public posts will be supplied when confirmed.</p>
       <div class="cards" style="margin-top:16px">
         <div class="card"><h3>Repo</h3><p class="small"><code>https://github.com/vasanthsreeram/bbs-sg-bank-modernization</code></p></div>
-        <div class="card"><h3>Demo video</h3><p class="small"><code>https://bbs-sg-bank-demo.pages.dev/media/bbs-sg-bank-demo.mp4</code> — script ready in <code>docs/05-demo-script.md</code></p></div>
-        <div class="card"><h3>Hosted</h3><p class="small"><code>https://bbs-sg-bank-demo.pages.dev</code> — runs locally today</p></div>
+        <div class="card"><h3>Demo video</h3><p class="small"><code>https://bbs-sg-bank-demo.pages.dev/media/bbs-sg-bank-demo.mp4</code> — 73-second recorded demo</p></div>
+        <div class="card"><h3>Hosted</h3><p class="small"><a href="https://bbs-sg-bank-demo.s-vasanthrojin.workers.dev/">Open the interactive app</a> · free Worker uses a JavaScript port; real COBOL terminal runs locally</p></div>
       </div>
-      <p class="note">Placeholders above are replaced before submission; the per-member posts are a submission requirement and are not published yet.</p>
+      <p class="note">Per-member public post links are required for submission and have not been supplied.</p>
       <div class="takeaway" style="margin-top:18px"><b>Reproduce it in four commands:</b>
         <code>python3 scripts/test_bank.py</code> → 33 tests · <code>python3 tests/test_modern.py</code> → 5 tests ·
         <code>python3 scripts/benchmark.py --accounts 1200 --operations 400</code> → parity + timings (needs <code>cobc</code>) ·
@@ -545,7 +539,7 @@ modern = run(<span class="s">"python3 modern/bank.py"</span>)
         <span class="pill">synthetic data · fictional bank</span>
       </div>
     </div>
-    <footer><span class="brand"><b>BBS</b> SG Bank</span><span class="foot-tag">12 / 12 · {TEAM_NAME}</span></footer>
+    <footer><span class="brand"><b>BBS</b> SG Bank</span><span class="foot-tag">12 / 12 · BBS SG Bank modernization</span></footer>
   </section>
 
 </div>

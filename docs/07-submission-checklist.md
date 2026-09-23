@@ -11,12 +11,12 @@ Legend: `[x]` done + evidence · `[~]` partial · `[ ]` not done / blocked.
 
 | | Requirement | Status | Evidence / placeholder |
 |---|---|---|---|
-| A1 | **Hosted** working prototype URL | `[ ]` ⛔ | `https://bbs-sg-bank-demo.pages.dev` |
-| A2 | **Short demo** (≤3 min) | `[ ]` ⛔ | `https://bbs-sg-bank-demo.pages.dev/media/bbs-sg-bank-demo.mp4`; script ready [`05-demo-script.md`](05-demo-script.md) |
+| A1 | **Hosted** working prototype URL | `[x]` ✅ | [Interactive Worker](https://bbs-sg-bank-demo.s-vasanthrojin.workers.dev/) (JavaScript port; COBOL terminal runs locally) |
+| A2 | **Short demo** (≤3 min) | `[x]` ✅ | `https://bbs-sg-bank-demo.pages.dev/media/bbs-sg-bank-demo.mp4`; script ready [`05-demo-script.md`](05-demo-script.md) |
 | A3 | **Before/after** explanation | `[x]` ✅ | [`02-before-after.md`](02-before-after.md) |
 | A4 | **Original public post per team member** (Medium or LinkedIn) | `[ ]` ⛔ | [`06-social-posts.md`](06-social-posts.md); URLs `{MEMBER_n_POST_URL}` |
 | A5 | Built **substantially with Opsera Forge** | `[~]` 🟡 | project created; **Assessment complete** (57/100, 10 findings; raw report not exported; `docs/forge/assessment.md` is a team transcript); **Intent v1 + PRD-Spec v1 + Architecture v1 + User Stories v1 approved and exported**, **Testing v1 generated and exported (not approved)** to `docs/forge/`; **Delivery pending** ([`04-...`](04-forge-pipeline-mapping.md)) |
-| A6 | Public repo | `[ ]` ⛔ | `https://github.com/vasanthsreeram/bbs-sg-bank-modernization` |
+| A6 | Public repo | `[x]` ✅ | `https://github.com/vasanthsreeram/bbs-sg-bank-modernization` |
 
 ---
 
@@ -34,7 +34,7 @@ Legend: `[x]` done + evidence · `[~]` partial · `[ ]` not done / blocked.
 | B1.6 | Parity AT-12 (legacy ↔ modern, byte-identical) | `[x]` ✅ | `parity … byte-identical: YES` in all `scripts/evidence/benchmark-*.txt` |
 | B1.7 | Demo app runs locally | `[x]` ✅ | `site/backend/app.py` (50 site tests), smoke-tested 2026-09-23 |
 | B1.8 | Terminal runs the **real** COBOL batch | `[x]` ✅ | `legacy-ui/` (20 tests): live 1,200×400 job → 400 processed, 3 rejected, 1.197 s actual COBOL execution (1.234 s overall), modern `TOTAL_CENTS` 5489403400 |
-| B1.9 | Hosted, clickable prototype (public URL) | `[ ]` ⛔ | `https://bbs-sg-bank-demo.pages.dev` |
+| B1.9 | Hosted, clickable prototype (public URL) | `[x]` ✅ | https://bbs-sg-bank-demo.s-vasanthrojin.workers.dev/ |
 
 ### B2 — Substantial Opsera Forge use (30%)
 
@@ -67,7 +67,7 @@ Legend: `[x]` done + evidence · `[~]` partial · `[ ]` not done / blocked.
 | B4.1 | Polished slide deck | `[x]` ✅ | [`slides/index.html`](../slides/index.html), [`slides/SLIDES.md`](../slides/SLIDES.md) |
 | B4.2 | Demo script timed ≤3 min | `[x]` ✅ | [`05-demo-script.md`](05-demo-script.md) |
 | B4.3 | Deck rehearsed end-to-end | `[ ]` ⛔ | — |
-| B4.4 | Demo recorded | `[ ]` ⛔ | `https://bbs-sg-bank-demo.pages.dev/media/bbs-sg-bank-demo.mp4` |
+| B4.4 | Demo recorded | `[x]` ✅ | `https://bbs-sg-bank-demo.pages.dev/media/bbs-sg-bank-demo.mp4` |
 
 ### B5 — Content (10%)
 
@@ -114,24 +114,8 @@ Legend: `[x]` done + evidence · `[~]` partial · `[ ]` not done / blocked.
    stories and 132 cases are **proposals, not implemented features or executed tests** (local
    suites: 108 passing). The supplied MCP `forge_` token is HTTP 401, but **signed-in browser
    downloads work**. 30% criterion is **partly** satisfied.
-3. ⛔ **Not deployed publicly** → hosting gate open (the app runs locally).
-4. ⛔ **No demo recording or published posts** → eligibility gates open.
+3. ✅ **Public demo deployed** — the Cloudflare Worker runs the JavaScript port of the modern engine. The real COBOL terminal requires local GnuCOBOL.
+4. 🟡 **73-second demo published; individual public posts pending.**
 5. 🟡 **`accounts.dat` parsing unguarded** (low priority; see `02-...` §4).
 
-> Current defensible claim: **"A modern, linear-time batch that passes AT-1…AT-13 with 33 +
-> 5 core passing tests (plus 50 site and 20 terminal tests) and byte-identical legacy/modern
-> parity, measured at 28.6x (1200×400) and 128.1x (5000×500) on synthetic fixtures against a
-> deliberately inefficient legacy design; wrapped in a working local demo app and an operator
-> terminal that runs the real COBOL; with an Opsera Forge project whose Assessment is
-> complete (57/100, 10 findings), whose Intent v1, PRD-Spec v1, Architecture v1 and User
-> Stories v1 (33 proposed stories) documents are **approved** and exported, and whose Testing
-> v1 (132 proposed cases) is **generated/exported (not approved)**, all to `docs/forge/` with
-> recorded hashes — the raw Assessment export and Delivery
-> stage are still pending, and Forge's proposals are not implemented or executed."**
-> Nothing stronger. In particular: do **not** claim a public hosted URL or published posts
-> yet, do **not** claim the assessment covers the current working-tree COBOL (its hash
-> differs from the uploaded copy), do **not** claim Testing v1 was approved, do **not** claim
-> the 33 stories were implemented or the 132 test cases were run, do **not** claim the
-> Delivery stage is complete, do **not** claim
-> Forge's proposals were built, and **never** claim Forge generated or ran the modern engine
-> or deployed anything.
+> Current status: public interactive Worker, 73-second video, slide deck and public repository are available. Individual public posts, the submission portal URL, team identity details and Forge Delivery are still outstanding. The hosted Worker runs a JavaScript port; the real COBOL terminal is reproducible locally.

@@ -136,6 +136,7 @@ def render(md: str) -> str:
 
 def main() -> int:
     SITE.mkdir(exist_ok=True)
+    shutil.copy2(ROOT / "scripts" / "submission-index.html", SITE / "index.html")
     for name in ("media", "slides", "screens", "docs", "evidence"):
         (SITE / name).mkdir(exist_ok=True)
 

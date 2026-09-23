@@ -4,7 +4,7 @@ Source of truth for [`index.html`](index.html). Slide separator: `---`. Speaker 
 `> **Notes:**`. Keep the honesty rules: no unmeasured multiplier, no Forge artifact we
 didn't export.
 
-**Presenter:** `{PRESENTER_NAME}` · **Deck length:** 12 slides · **Talk:** ≤3 min (see
+**Presenter:** to be confirmed · **Deck length:** 12 slides · **Talk:** ≤3 min (see
 [`../docs/05-demo-script.md`](../docs/05-demo-script.md)).
 
 **Theme:** light (white slides, navy ink, indigo/emerald accents). **Graphics:** inline SVG,
@@ -24,7 +24,7 @@ A truthful, evidence-linked legacy modernization — the planning driven through
 Pipeline chips: 1 Assessment · 2 Intent · 3 PRD-Spec · 4 Architecture · 5 User Stories ·
 6 Testing · 7 Delivery — pending.
 
-`{TEAM_NAME}` · `23 September 2026` · hosted: `https://bbs-sg-bank-demo.pages.dev`
+BBS SG Bank modernization · `23 September 2026` · hosted: `https://bbs-sg-bank-demo.pages.dev`
 
 *Right:* screenshot of the local demo app overview (legacy panel beside modern panel).
 
@@ -223,14 +223,9 @@ per-member posts, deck not yet rehearsed.
 
 ## Slide 11 — Team & links
 
-| Member | Contribution | Post |
-|---|---|---|
-| `{MEMBER_1_NAME}` | Legacy assessment / COBOL analysis | `{MEMBER_1_POST_URL}` |
-| `{MEMBER_2_NAME}` | Architecture + modern implementation | `{MEMBER_2_POST_URL}` |
-| `{MEMBER_3_NAME}` | Parity harness + tests | `{MEMBER_3_POST_URL}` |
-| `{MEMBER_4_NAME}` | Forge pipeline lead + delivery | `{MEMBER_4_POST_URL}` |
+Contributor names and individual public posts remain to be confirmed. The deck links the project evidence directly.
 
-Repo `https://github.com/vasanthsreeram/bbs-sg-bank-modernization` · Demo `https://bbs-sg-bank-demo.pages.dev/media/bbs-sg-bank-demo.mp4` · Hosted `https://bbs-sg-bank-demo.pages.dev`
+Repo `https://github.com/vasanthsreeram/bbs-sg-bank-modernization` · Demo `https://bbs-sg-bank-demo.pages.dev/media/bbs-sg-bank-demo.mp4` · Interactive app `https://bbs-sg-bank-demo.s-vasanthrojin.workers.dev/`
 
 *Bottom band:* the four commands that reproduce the evidence —
 `python3 scripts/test_bank.py` (33 tests) · `python3 tests/test_modern.py` (5 tests) ·
@@ -273,15 +268,6 @@ terminal labels its replay rows `SIMULATED` and the app labels itself `synthetic
 labels are visible in the images, so the deck does not imply real customers or data.
 
 ---
-
-## Placeholder replacement
-
-| Token | Meaning |
-|---|---|
-| `{TEAM_NAME}`, `{PRESENTER_NAME}` | Names |
-| `{MEMBER_n_NAME}`, `{MEMBER_n_POST_URL}` | Team + posts |
-| `https://github.com/vasanthsreeram/bbs-sg-bank-modernization`, `https://bbs-sg-bank-demo.pages.dev/media/bbs-sg-bank-demo.mp4`, `https://bbs-sg-bank-demo.pages.dev` | Links |
-| `SF Enterprise Hackathon 2.0`, `23 September 2026` | Event + date |
 
 ## Viewing & controls
 

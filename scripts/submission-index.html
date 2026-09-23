@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BBS SG Bank — legacy COBOL to modern ledger (synthetic demo)</title>
+<meta name="description" content="A fictional bank's nightly COBOL batch, modernised and measured. Synthetic data only; no real accounts or customers.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232563eb'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='13' font-weight='700' fill='white' text-anchor='middle'%3EBBS%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --ink: #0f1728; --muted: #4d5a75; --line: #e2e8f2; --blue: #2563eb;
+    --teal: #0d9488; --paper: #f7f9fc; --amber-soft: #fdf0e2; --amber: #8a5312;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.5;
+  }
+  a { color: var(--blue); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 40px 22px 72px; }
+  header { display: flex; align-items: center; gap: 14px; margin-bottom: 34px; }
+  .mark {
+    width: 46px; height: 46px; border-radius: 12px; background: var(--blue); color: #fff;
+    display: grid; place-items: center; font-weight: 800; letter-spacing: .02em;
+  }
+  header h1 { font-size: 22px; margin: 0; }
+  header p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+  h2 { font-size: 30px; letter-spacing: -.02em; margin: 46px 0 12px; }
+  h3 { font-size: 19px; margin: 26px 0 6px; }
+  p { margin: 10px 0; }
+  .lede { font-size: 19px; color: var(--muted); max-width: 70ch; }
+  .banner {
+    background: var(--amber-soft); color: var(--amber); border: 1px solid #f0dcc2;
+    border-radius: 14px; padding: 14px 18px; font-size: 15px; margin: 22px 0;
+  }
+  .grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .card {
+    background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px;
+    box-shadow: 0 16px 34px -26px rgba(15, 23, 40, .4);
+  }
+  .card h3 { margin-top: 0; }
+  .stats { display: flex; flex-wrap: wrap; gap: 12px; margin: 18px 0 6px; }
+  .stat {
+    background: #fff; border: 1px solid var(--line); border-radius: 999px;
+    padding: 10px 18px; font-size: 15px; font-weight: 600;
+  }
+  .stat--after { background: #e3f5f1; border-color: #c8e9e1; color: #0a6a58; }
+  video { width: 100%; border-radius: 16px; border: 1px solid var(--line); background: #000; }
+  .links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+  .btn {
+    display: inline-block; padding: 12px 20px; border-radius: 12px; background: #fff;
+    border: 1px solid var(--line); text-decoration: none; font-weight: 600; font-size: 15px;
+  }
+  .btn--primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+  ul { margin: 8px 0 0 18px; padding: 0; }
+  li { margin: 4px 0; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em; }
+  footer { margin-top: 52px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 18px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="mark">BBS</span>
+    <div>
+      <h1>BBS SG Bank — legacy to modern ledger</h1>
+      <p>SF Enterprise Hackathon 2.0 entry · synthetic demo, no real customers</p>
+    </div>
+  </header>
+
+  <p class="lede">
+    A fictional bank runs its nightly posting on COBOL: the legacy program re-reads its whole account
+    master file once per operation and rewrites it in full for every row it accepts. The migration
+    keeps the same files and the same validation rules in a 54-line Python engine that indexes the
+    ledger in memory — and the difference is measured, not asserted.
+  </p>
+
+  <div class="stats">
+    <span class="stat">28.6× · 1,200 × 400</span>
+    <span class="stat">115× · 5,000 × 500</span>
+    <span class="stat stat--after">parity: byte-identical ledgers</span>
+    <span class="stat">108 tests passing</span>
+  </div>
+
+  <h2 id="video">Demo video</h2>
+  <video controls preload="metadata" poster="screens/overview.png" src="media/bbs-sg-bank-demo.mp4">
+    Your browser cannot play this video — <a href="media/bbs-sg-bank-demo.mp4">download it instead</a>.
+  </video>
+  <p class="lede" style="font-size:15px">73 seconds. Narration in the Grok (xAI) voice “Eve”, burned-in captions.</p>
+
+  <h2>What is in the entry</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>The two engines</h3>
+      <p><code>legacy/bank.cob</code> — 172 lines of GnuCOBOL, deliberately inefficient:<br>
+         <code>O(operations × accounts)</code>, three full file traversals per accepted row.</p>
+      <p><code>modern/bank.py</code> — 54 lines of stdlib Python: accounts in a dict, integer cents,
+         one read and one write per run, <code>O(accounts + operations)</code>.</p>
+    </div>
+    <div class="card">
+      <h3>Evidence</h3>
+      <p>Every number on this site comes from a recorded run of the repository's own harness:</p>
+      <ul>
+        <li><a href="evidence/benchmark-1200x400.txt">1,200 × 400 benchmark</a></li>
+        <li><a href="evidence/benchmark-5000x500.txt">5,000 × 500 benchmark</a></li>
+        <li><a href="evidence/benchmark-final-5000x500.txt">parity-gated rerun (115.4×)</a></li>
+        <li><a href="evidence/benchmark-sweep.txt">account-count sweep</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Repository</h3>
+      <p>The engines, fixtures, tests, benchmark harness, migration documents and the video
+         project are all in the public repository:</p>
+      <p><a href="https://github.com/vasanthsreeram/bbs-sg-bank-modernization">github.com/vasanthsreeram/bbs-sg-bank-modernization</a></p>
+    </div>
+    <div class="card">
+      <h3>Opsera Forge</h3>
+      <p>The migration ran through Forge: assessment, intent, specification, architecture, user
+         stories and test cases, exported at each step. Those are planning documents — the running
+         engines in this demo are hand-written and covered by the repository's tests.</p>
+      <p><a href="docs/">Read the migration journal and Forge artifacts</a></p>
+    </div>
+  </div>
+
+  <h2>Presentation and walkthrough</h2>
+  <div class="links">
+    <a class="btn btn--primary" href="https://bbs-sg-bank-demo.s-vasanthrojin.workers.dev/">Open the interactive app</a>
+    <a class="btn" href="slides/">Open the slide deck</a>
+    <a class="btn" href="screens/">Screenshots of the running demo</a>
+    <a class="btn" href="docs/">Migration documents</a>
+    <a class="btn" href="https://github.com/vasanthsreeram/bbs-sg-bank-modernization">Source repository</a>
+  </div>
+
+  <h2>Running the demo</h2>
+  <p>
+    The two engines, the browser demo and the 1980s operator terminal run locally from the
+    repository: <code>site/run.sh</code> serves the modern ledger demo, and
+    <code>legacy-ui/run.sh</code> serves the operator terminal, which compiles
+    <code>legacy/bank.cob</code> with <code>cobc</code> and runs it as a real subprocess for each
+    job. A live job (1,200 accounts, 400 operations, preset M) reports 400 processed, 3 rejected,
+    0.915 s of COBOL wall clock, and passes <code>STEP020 VERIFY</code> against
+    <code>modern/bank.py</code>.
+  </p>
+
+  <div class="banner">
+    <strong>The interactive prototype is live.</strong>
+    <a href="https://bbs-sg-bank-demo.s-vasanthrojin.workers.dev/">Open the BBS SG Bank app</a>.
+    The free Cloudflare Worker runs a JavaScript port of the modern engine. The real COBOL
+    operator terminal runs locally from the repository; the hosted app marks it unavailable.
+  </div>
+
+  <footer>
+    BBS SG Bank is a fictional bank invented for this hackathon entry. All accounts, balances and
+    transactions are generated synthetic data. The performance figures describe this deliberately
+    inefficient synthetic COBOL baseline and are not a general claim about COBOL.
+  </footer>
+</div>
+</body>
+</html>
